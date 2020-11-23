@@ -50,6 +50,7 @@ constexpr auto DEFAULT_NTP_TIMEOUT = 1500; // Default NTP timeout ms
 constexpr auto MIN_NTP_TIMEOUT = 100; // Minumum admisible ntp timeout in ms
 constexpr auto MIN_NTP_INTERVAL = 5; // Minumum NTP request interval in seconds
 constexpr auto MIN_SYNC_ACCURACY_US = 5000; // Minimum sync accuracy in us
+constexpr auto ESP8266_LOOP_RASK_INTERVAL = 1000; // Loop task period on ESP8266
 
 constexpr auto TZNAME_LENGTH = 60; // Max TZ name description length
 constexpr auto SERVER_NAME_LENGTH = 40; // Max server name (FQDN) length

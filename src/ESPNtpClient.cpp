@@ -145,7 +145,7 @@ bool NTPClient::begin (const char* ntpServerName) {
         &loopHandle, /* Task handle to keep track of created task */
         CONFIG_ARDUINO_RUNNING_CORE);
 #else
-    loopTimer.attach_ms (actualInterval, &NTPClient::s_getTimeloop, (void*)this);
+    loopTimer.attach_ms (ESP8266_LOOP_RASK_INTERVAL, &NTPClient::s_getTimeloop, (void*)this);
 #endif
     
     DEBUGLOG ("First time sync request");
@@ -204,24 +204,11 @@ void NTPClient::processPacket (struct pbuf* packet) {
         DEBUGLOG ("Next sync programmed for %d seconds", getLongInterval ());
         status = syncd;    
     }
-#ifdef ESP8266
-    int prevInterval = actualInterval;
-    if (status == partialSync) {
-        actualInterval = FAST_NTP_SYNCNTERVAL;
-    } else {
-        actualInterval = longInterval;        
-    }
-    if (prevInterval != actualInterval) {
-        loopTimer.detach ();
-        loopTimer.attach_ms (actualInterval, &NTPClient::s_getTimeloop, (void*)this);
-    }
-#else
     if (status == partialSync) {
         actualInterval = FAST_NTP_SYNCNTERVAL;
     } else {
         actualInterval = longInterval;
     }
-#endif
     DEBUGLOG ("Sync frequency set low");
     DEBUGLOG ("Successful NTP sync at %s", getTimeDateString (getLastNTPSync ()));
     if (!firstSync.tv_sec) {
@@ -279,15 +266,11 @@ void NTPClient::s_getTimeloop (void* arg) {
 
         if (self->isConnected) {
             if (WiFi.isConnected()) {
-#ifdef ESP32
                 if (millis () - lastGotTime >= self->actualInterval) {
-#endif
                     lastGotTime = millis ();
                     DEBUGLOG ("Periodic loop. Millis = %d", lastGotTime);
                     self->getTime ();  
-#ifdef ESP32
                 }
-#endif
             } else {
                 DEBUGLOG ("DISCONNECTED");
                 udp_remove (self->udp);
@@ -317,7 +300,7 @@ void NTPClient::s_getTimeloop (void* arg) {
                 }
 
                 udp_recv (self->udp, &NTPClient::s_recvPacket, self);
-
+                self->getTime ();
                 self->isConnected = true;
             }
         }
@@ -479,32 +462,14 @@ bool NTPClient::setInterval (int interval) {
             longInterval = newInterval;
             DEBUGLOG ("Sync interval set to %d s", interval);
             if (syncStatus () == syncd) {
-#ifdef ESP32
                 actualInterval = longInterval;
-#else
-                int prevInterval = actualInterval;
-                actualInterval = longInterval;
-                if (loopTimer.active () && prevInterval != actualInterval) {
-                    loopTimer.detach ();
-                    loopTimer.attach_ms (actualInterval, &NTPClient::s_getTimeloop, (void*)this);
-                }
-#endif
             }
         }
         return true;
     } else {
         longInterval = MIN_NTP_INTERVAL * 1000;
         if (syncStatus () == syncd) {
-#ifdef ESP32
             actualInterval = longInterval;
-#else
-            int prevInterval = actualInterval;
-            actualInterval = longInterval;
-            if (loopTimer.active () && prevInterval != actualInterval) {
-                loopTimer.detach ();
-                loopTimer.attach_ms (actualInterval, &NTPClient::s_getTimeloop, (void*)this);
-            }
-#endif
         }
         DEBUGLOG ("Too low value. Sync interval set to minimum: %d s", MIN_NTP_INTERVAL);
         return false;
@@ -518,35 +483,13 @@ bool NTPClient::setInterval (int shortInterval, int longInterval) {
         this->shortInterval = newShortInterval;
         this->longInterval = newLongInterval;
         if (syncStatus () != syncd) {
-#ifdef ESP32
             actualInterval = this->shortInterval;
-#else
-            int prevInterval = actualInterval;
-            actualInterval = this->shortInterval;
-            if (loopTimer.active () && prevInterval != actualInterval) {
-                loopTimer.detach ();
-                loopTimer.attach_ms (actualInterval, &NTPClient::s_getTimeloop, (void*)this);
-            }
-#endif
 
         } else {
-#ifdef ESP32
             actualInterval = this->longInterval;
-#else
-            int prevInterval = actualInterval;
-            actualInterval = this->longInterval;
-            if (loopTimer.active () && prevInterval != actualInterval) {
-                loopTimer.detach ();
-                loopTimer.attach_ms (actualInterval, &NTPClient::s_getTimeloop, (void*)this);
-            }
-#endif
        }
         DEBUGLOG ("Short sync interval set to %d s\n", shortInterval);
         DEBUGLOG ("Long sync interval set to %d s\n", longInterval);
-#ifdef ESP8266
-        loopTimer.detach ();
-        loopTimer.attach_ms (actualInterval, &NTPClient::s_getTimeloop, (void*)this);
-#endif
 return true;
     } else {
         DEBUGLOG ("Too low interval values");
