@@ -1,0 +1,21 @@
+{
+  "name": "ESPNtpClient",
+  "frameworks": "arduino",
+  "version": "0.0.2",
+  "keywords": "time, date, hour, minute, second, day, week, month, year, RTC, NTP, millisecond",
+  "platforms": ["espressif32", "espressif8266"],
+  "description": "High accuracy NTP client library",
+  "url": "https://github.com/gmag11/ESPNtpClient",
+  "authors":
+    {
+      "name": "Germán Martín",
+      "email": "gmag11@gmail.com"
+    },
+  "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/gmag11/ESPNtpClient.git"
+    },
+  "examples": "examples/*/*.ino"
+}
+
