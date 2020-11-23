@@ -339,13 +339,13 @@ void NTPClient::getTime () {
         DEBUGLOG ("Port already used");
         if (onSyncEvent)
             onSyncEvent (invalidPort, 0, 0);
-        return;
+        //return;
     }
     if (result == ERR_RTE) {
         DEBUGLOG ("Port already used");
         if (onSyncEvent)
             onSyncEvent (invalidAddress, 0, 0);
-        return;
+        //return;
     }
     
     DEBUGLOG ("Sending UDP packet");
