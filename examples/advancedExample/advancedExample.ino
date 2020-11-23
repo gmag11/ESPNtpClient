@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "WifiConfig.h"
+//#include "WifiConfig.h"
 #include <ESPNtpClient.h>
 #ifdef ESP32
 #include <WiFi.h>
