@@ -122,9 +122,9 @@ protected:
     timeval firstSync;      ///< Stored time of first successful sync after boot
     timeval packetLastReceived; ///< Moment when a NTP response has arrived
     unsigned long uptime = 0;  ///< Time since boot
-    int shortInterval = DEFAULT_NTP_SHORTINTERVAL * 1000;    ///< Interval to set periodic time sync until first synchronization.
-    int longInterval = DEFAULT_NTP_INTERVAL * 1000;          ///< Interval to set periodic time sync
-    int actualInterval = DEFAULT_NTP_SHORTINTERVAL * 1000;   ///< Currently selected interval
+    unsigned int shortInterval = DEFAULT_NTP_SHORTINTERVAL * 1000;    ///< Interval to set periodic time sync until first synchronization.
+    unsigned int longInterval = DEFAULT_NTP_INTERVAL * 1000;          ///< Interval to set periodic time sync
+    unsigned int actualInterval = DEFAULT_NTP_SHORTINTERVAL * 1000;   ///< Currently selected interval
     onSyncEvent_t onSyncEvent;  ///< Event handler callback
     uint16_t ntpTimeout = DEFAULT_NTP_TIMEOUT; ///< Response timeout for NTP requests
     NTPStatus_t status = unsyncd; ///< Sync status

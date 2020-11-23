@@ -456,7 +456,7 @@ bool NTPClient::setNtpServerName (const char* serverName) {
 }
 
 bool NTPClient::setInterval (int interval) {
-    int newInterval = interval * 1000;
+    unsigned int newInterval = interval * 1000;
     if (interval >= MIN_NTP_INTERVAL) {
         if (longInterval != newInterval) {
             longInterval = newInterval;
