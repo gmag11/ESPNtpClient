@@ -209,6 +209,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
     } else {
         actualInterval = longInterval;
     }
+    DEBUGLOG ("Iinterval set to = %d", actualInterval);
     DEBUGLOG ("Sync frequency set low");
     DEBUGLOG ("Successful NTP sync at %s", getTimeDateString (getLastNTPSync ()));
     if (!firstSync.tv_sec) {
@@ -321,6 +322,8 @@ void NTPClient::getTime () {
     }
     if (ntpServerIPAddress == INADDR_NONE) {
         DEBUGLOG ("IP address unset. Aborting");
+        actualInterval = shortInterval;
+        DEBUGLOG ("Set interval to = %d", actualInterval);
         if (onSyncEvent)
             onSyncEvent (invalidAddress, 0, 0);
         return;
@@ -463,6 +466,7 @@ bool NTPClient::setInterval (int interval) {
             DEBUGLOG ("Sync interval set to %d s", interval);
             if (syncStatus () == syncd) {
                 actualInterval = longInterval;
+                DEBUGLOG ("Set interval to = %d", actualInterval);
             }
         }
         return true;
@@ -470,6 +474,7 @@ bool NTPClient::setInterval (int interval) {
         longInterval = MIN_NTP_INTERVAL * 1000;
         if (syncStatus () == syncd) {
             actualInterval = longInterval;
+            DEBUGLOG ("Set interval to = %d", actualInterval);
         }
         DEBUGLOG ("Too low value. Sync interval set to minimum: %d s", MIN_NTP_INTERVAL);
         return false;
@@ -487,7 +492,8 @@ bool NTPClient::setInterval (int shortInterval, int longInterval) {
 
         } else {
             actualInterval = this->longInterval;
-       }
+        }
+        DEBUGLOG ("Interval set to = %d", actualInterval);
         DEBUGLOG ("Short sync interval set to %d s\n", shortInterval);
         DEBUGLOG ("Long sync interval set to %d s\n", longInterval);
 return true;
