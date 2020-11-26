@@ -14,8 +14,6 @@
 #define YOUR_WIFI_PASSWD "YOUR_WIFI_PASSWD"
 #endif // !WIFI_CONFIG_H
 
-#define SHOW_TIME_PERIOD 1000
-
 const PROGMEM char* ntpServer = "pool.ntp.org";
 
 #ifndef LED_BUILTIN
@@ -54,7 +52,7 @@ void setup () {
 void loop () {
     timeval currentTime;
     gettimeofday (&currentTime, NULL);
-    digitalWrite (LED_BUILTIN, !(currentTime.tv_usec >= 0 && currentTime.tv_usec < 50000));
+    digitalWrite (LED_BUILTIN, !(currentTime.tv_usec >= 0 && currentTime.tv_usec < 10000));
     if (syncEventTriggered) {
         syncEventTriggered = false;
         processSyncEvent (ntpEvent);
