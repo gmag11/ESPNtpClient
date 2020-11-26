@@ -32,7 +32,11 @@ void processSyncEvent (NTPEvent_t ntpEvent) {
                        ntpEvent.info.port,
                        ntpEvent.info.offset * 1000,
                        ntpEvent.info.delay * 1000);
-    }
+    } /*else if (ntpEvent.event == partlySync) {
+        Serial.printf ("[NTP-event] Partial sync %s Offset %0.3f\n",
+                       NTP.getTimeDateStringUs (),
+                       ntpEvent.info.offset * 1000);
+    }*/
 }
 
 
