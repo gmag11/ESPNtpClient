@@ -139,8 +139,8 @@ void loop() {
     }
 
     if (syncEventTriggered) {
-        processSyncEvent (ntpEvent);
         syncEventTriggered = false;
+        processSyncEvent (ntpEvent);
     }
 
     if ((millis () - last) > SHOW_TIME_PERIOD) {
