@@ -448,6 +448,22 @@ public:
     char* getNtpServerName (){
         return ntpServerName;
     }
+    
+    int64_t millis () {
+        timeval currentTime;
+        gettimeofday (&currentTime, NULL);
+        int64_t milliseconds = (int64_t)currentTime.tv_sec * 1000L + (int64_t)currentTime.tv_usec / 1000L;
+        //Serial.printf ("timeval: %ld.%ld millis %lld\n", currentTime.tv_sec, currentTime.tv_usec, milliseconds);
+        return milliseconds;
+    }
+    
+    int64_t micros() {
+        timeval currentTime;
+        gettimeofday (&currentTime, NULL);
+        int64_t microseconds = (int64_t)currentTime.tv_sec * 1000000L + (int64_t)currentTime.tv_usec;
+        //Serial.printf ("timeval: %ld.%ld micros %lld\n", currentTime.tv_sec, currentTime.tv_usec, microseconds);
+        return microseconds;
+    }
 
     
 };

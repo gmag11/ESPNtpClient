@@ -297,8 +297,8 @@ void NTPClient::s_getTimeloop (void* arg) {
 
         if (self->isConnected) {
             if (WiFi.isConnected()) {
-                if (millis () - lastGotTime >= self->actualInterval) {
-                    lastGotTime = millis ();
+                if (::millis () - lastGotTime >= self->actualInterval) {
+                    lastGotTime = ::millis ();
                     DEBUGLOG ("Periodic loop. Millis = %d", lastGotTime);
                     self->getTime ();  
                 }

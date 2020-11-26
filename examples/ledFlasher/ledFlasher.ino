@@ -32,11 +32,7 @@ void processSyncEvent (NTPEvent_t ntpEvent) {
                        ntpEvent.info.port,
                        ntpEvent.info.offset * 1000,
                        ntpEvent.info.delay * 1000);
-    } // else if (ntpEvent.event == partlySync) {
-    //     Serial.printf ("[NTP-event] Partial sync %s Offset %0.3f\n",
-    //                    NTP.getTimeDateString (NTP.getLastNTPSyncUs ()),
-    //                    ntpEvent.info.offset * 1000);
-    // }
+    }
 }
 
 
@@ -49,6 +45,7 @@ void setup () {
         ntpEvent = event;
         syncEventTriggered = true;
     });
+    NTP.setInterval (300);
     NTP.begin (ntpServer);
     pinMode (LED_BUILTIN, OUTPUT);
     digitalWrite (LED_BUILTIN, HIGH);
@@ -57,7 +54,8 @@ void setup () {
 void loop () {
     timeval currentTime;
     gettimeofday (&currentTime, NULL);
-    digitalWrite (LED_BUILTIN, !(currentTime.tv_usec >= 0 && currentTime.tv_usec < 10000));
+    int64_t us = NTP.micros () % 1000000L;
+    digitalWrite (LED_BUILTIN, !(us >= 0 && us < 10000));
     if (syncEventTriggered) {
         syncEventTriggered = false;
         processSyncEvent (ntpEvent);
