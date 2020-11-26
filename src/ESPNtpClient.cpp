@@ -145,7 +145,7 @@ bool NTPClient::begin (const char* ntpServerName) {
         &loopHandle, /* Task handle to keep track of created task */
         CONFIG_ARDUINO_RUNNING_CORE);
 #else
-    loopTimer.attach_ms (ESP8266_LOOP_RASK_INTERVAL, &NTPClient::s_getTimeloop, (void*)this);
+    loopTimer.attach_ms (ESP8266_LOOP_TASK_INTERVAL, &NTPClient::s_getTimeloop, (void*)this);
 #endif
     
     DEBUGLOG ("First time sync request");
@@ -158,6 +158,7 @@ bool NTPClient::begin (const char* ntpServerName) {
 void NTPClient::processPacket (struct pbuf* packet) {
     NTPPacket_t ntpPacket;
     bool offsetApplied = false;
+    static bool wasPartial;
     
     if (!packet) {
         DEBUGLOG ("Received packet empty");
@@ -191,7 +192,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
     
     decodeNtpMessage ((uint8_t*)packet->payload, packet->len, &ntpPacket);
     timeval tvOffset = calculateOffset (&ntpPacket);
-    if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < 1000) { // Less than 1 ms
+    if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < TIME_SYNC_THRESHOLD) { // Less than 1 ms
         DEBUGLOG ("Offset %0.3f ms is under threshold. Not updating", ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
     } else {
         if (!adjustOffset (&tvOffset)) {
@@ -212,10 +213,16 @@ void NTPClient::processPacket (struct pbuf* packet) {
         DEBUGLOG ("Minimum accuracy not reached. Repeating sync");
         DEBUGLOG ("Next sync programmed for %d ms", FAST_NTP_SYNCNTERVAL);
         status = partialSync;
+        wasPartial = true;
     } else {
         DEBUGLOG ("Status set to SYNCD");
         DEBUGLOG ("Next sync programmed for %d seconds", getLongInterval ());
         status = syncd;    
+        if (wasPartial){
+            offsetApplied = true;
+        }
+        //Serial.printf ("Status: %d wasPartial: %d offsetApplied %d Offset %0.3f\n", status, wasPartial, offsetApplied, ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
+        wasPartial = false;
     }
     if (status == partialSync) {
         actualInterval = FAST_NTP_SYNCNTERVAL;

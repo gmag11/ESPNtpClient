@@ -24,14 +24,19 @@ boolean syncEventTriggered = false; // True if a time even has been triggered
 NTPEvent_t ntpEvent; // Last triggered event
 
 void processSyncEvent (NTPEvent_t ntpEvent) {
-    if (!ntpEvent.event) {
+    //Serial.printf ("[NTP-event] %d\n", ntpEvent.event);
+    if (ntpEvent.event == timeSyncd) {
         Serial.printf ("[NTP-event] Got NTP time: %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms\n",
-                       NTP.getTimeDateString (NTP.getLastNTPSyncUs ()),
+                       NTP.getTimeDateStringUs (),
                        ntpEvent.info.serverAddress.toString ().c_str (),
                        ntpEvent.info.port,
                        ntpEvent.info.offset * 1000,
                        ntpEvent.info.delay * 1000);
-    }
+    } // else if (ntpEvent.event == partlySync) {
+    //     Serial.printf ("[NTP-event] Partial sync %s Offset %0.3f\n",
+    //                    NTP.getTimeDateString (NTP.getLastNTPSyncUs ()),
+    //                    ntpEvent.info.offset * 1000);
+    // }
 }
 
 
@@ -40,13 +45,13 @@ void setup () {
     Serial.println ();
     WiFi.begin (YOUR_WIFI_SSID, YOUR_WIFI_PASSWD);
     NTP.setTimeZone (TZ_Etc_UTC);
-    NTP.begin (ntpServer);
-    pinMode (LED_BUILTIN, OUTPUT);
-    digitalWrite (LED_BUILTIN, HIGH);
     NTP.onNTPSyncEvent ([] (NTPEvent_t event) {
         ntpEvent = event;
         syncEventTriggered = true;
     });
+    NTP.begin (ntpServer);
+    pinMode (LED_BUILTIN, OUTPUT);
+    digitalWrite (LED_BUILTIN, HIGH);
 }
 
 void loop () {
@@ -57,5 +62,4 @@ void loop () {
         syncEventTriggered = false;
         processSyncEvent (ntpEvent);
     }
-
 }
