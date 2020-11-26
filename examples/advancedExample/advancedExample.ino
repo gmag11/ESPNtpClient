@@ -25,7 +25,7 @@ const PROGMEM char* ntpServer = "pool.ntp.org";
 bool wifiFirstConnected = false;
 
 boolean syncEventTriggered = false; // True if a time even has been triggered
-NTPSyncEvent_t ntpEvent; // Last triggered event
+NTPEvent_t ntpEvent; // Last triggered event
 double offset;
 double timedelay;
 
@@ -77,21 +77,36 @@ void onWifiEvent (WiFiEvent_t event) {
     }
 }
 
-void processSyncEvent (NTPSyncEvent_t ntpEvent, double offset, double tdelay) {
-    if (ntpEvent < 0) {
-        Serial.printf ("Time Sync error %d:", ntpEvent);
-        if (ntpEvent == noResponse) {
-            Serial.println ("NTP server not reachable");
-        } else if (ntpEvent == invalidAddress) {
-            Serial.println ("Invalid NTP server address");
+void processSyncEvent (NTPEvent_t ntpEvent) {
+    Serial.print ("[NTP-event] ");
+    if (ntpEvent.event < 0) {
+        Serial.printf ("Time Sync error %d: ", ntpEvent.event);
+        if (ntpEvent.event == noResponse) {
+            Serial.printf ("NTP server not reachable: %s", 
+                           ntpEvent.info.serverAddress.toString ().c_str ());
+        } else if (ntpEvent.event == invalidAddress) {
+            Serial.printf ("Invalid NTP server address: %s",
+                           ntpEvent.info.serverAddress.toString ().c_str ());
         }
-    } else if (!ntpEvent) {
-        Serial.printf ("Got NTP time: %s. Offset: %0.3f ms. Delay: %0.3f ms\n",
-                       NTP.getTimeDateString (NTP.getLastNTPSyncUs ()),
-                       offset, timedelay);
     } else {
-        Serial.println ("NTP request Sent");
+        if (!ntpEvent.event) {
+            Serial.printf ("Got NTP time: %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms",
+                       NTP.getTimeDateString (NTP.getLastNTPSyncUs ()),
+                       ntpEvent.info.serverAddress.toString ().c_str (),
+                       ntpEvent.info.port,
+                       ntpEvent.info.offset * 1000, 
+                       ntpEvent.info.delay * 1000);
+        } else if (ntpEvent.event == requestSent) {
+            Serial.printf ("NTP request Sent to %s:%u",
+                           ntpEvent.info.serverAddress.toString ().c_str (),
+                           ntpEvent.info.port);        
+        } else if (ntpEvent.event == partlySync) {
+            Serial.printf ("Partial sync %s Offset %0.3f",
+                           NTP.getTimeDateString (NTP.getLastNTPSyncUs ()),
+                           ntpEvent.info.offset * 1000);
+        }
     }
+    Serial.println ();
 }
 
 
@@ -104,11 +119,9 @@ void setup() {
     pinMode (ONBOARDLED, OUTPUT); // Onboard LED
     digitalWrite (ONBOARDLED, HIGH); // Switch off LED
     
-    NTP.onNTPSyncEvent ([] (NTPSyncEvent_t event, double toffset, double tdelay) {
+    NTP.onNTPSyncEvent ([] (NTPEvent_t event) {
         ntpEvent = event;
         syncEventTriggered = true;
-        offset = toffset * 1000;
-        timedelay = tdelay * 1000;
     });
     WiFi.onEvent (onWifiEvent);
 }
@@ -120,13 +133,13 @@ void loop() {
     if (wifiFirstConnected) {
         wifiFirstConnected = false;
         NTP.setTimeZone (TZ_Europe_Madrid);
-        NTP.setInterval (30);
+        NTP.setInterval (600);
         NTP.setNTPTimeout (NTP_TIMEOUT);
         NTP.begin (ntpServer);
     }
 
     if (syncEventTriggered) {
-        processSyncEvent (ntpEvent, offset, timedelay);
+        processSyncEvent (ntpEvent);
         syncEventTriggered = false;
     }
 

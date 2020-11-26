@@ -19,7 +19,6 @@
 const PROGMEM char* ntpServer = "pool.ntp.org";
 
 boolean syncEventTriggered = false; // True if a time even has been triggered
-NTPSyncEvent_t ntpEvent; // Last triggered event
 
 void setup() {
     Serial.begin (115200);

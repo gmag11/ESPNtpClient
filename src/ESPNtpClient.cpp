@@ -175,8 +175,15 @@ void NTPClient::processPacket (struct pbuf* packet) {
         // actualInterval = shortInterval;
         // DEBUGLOG ("Set interval to = %d", actualInterval);
         // DEBUGLOG ("Status set to UNSYNCD");
-        if (onSyncEvent)
-            onSyncEvent (responseError, 0, 0);
+        if (onSyncEvent) {
+            NTPEvent_t event;
+            event.event = responseError;
+            event.info.serverAddress = ntpServerIPAddress;
+            event.info.port = DEFAULT_NTP_PORT;
+            event.info.offset = 0;
+            event.info.delay = 0;
+            onSyncEvent (event);
+        }  
         return;
     }
 
@@ -185,12 +192,18 @@ void NTPClient::processPacket (struct pbuf* packet) {
     decodeNtpMessage ((uint8_t*)packet->payload, packet->len, &ntpPacket);
     timeval tvOffset = calculateOffset (&ntpPacket);
     if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < 1000) { // Less than 1 ms
-        DEBUGLOG ("Too low offset %0.3f ms", ((float)tvOffset.tv_sec+(float)tvOffset.tv_usec/1000000.0)*1000);
+        DEBUGLOG ("Offset %0.3f ms is under threshold. Not updating", ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
     } else {
         if (!adjustOffset (&tvOffset)) {
             DEBUGLOG ("Error applying offset");
-            if (onSyncEvent)
-                onSyncEvent (syncError, 0, 0);
+            if (onSyncEvent) {
+                NTPEvent_t event;
+                event.event = syncError;
+                event.info.serverAddress = ntpServerIPAddress;
+                event.info.port = DEFAULT_NTP_PORT;
+                event.info.offset = ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000.0;
+                onSyncEvent (event);
+            }
         }
         offsetApplied = true;
 
@@ -209,14 +222,24 @@ void NTPClient::processPacket (struct pbuf* packet) {
     } else {
         actualInterval = longInterval;
     }
-    DEBUGLOG ("Iinterval set to = %d", actualInterval);
+    DEBUGLOG ("Interval set to = %d", actualInterval);
     DEBUGLOG ("Sync frequency set low");
     DEBUGLOG ("Successful NTP sync at %s", getTimeDateString (getLastNTPSync ()));
     if (!firstSync.tv_sec) {
         firstSync = lastSyncd;
     }
     if (offsetApplied && onSyncEvent) {
-            onSyncEvent (timeSyncd, offset, delay);
+        NTPEvent_t event;
+        if (status == partialSync){
+            event.event = partlySync;
+        } else {
+            event.event = timeSyncd;
+        }
+        event.info.offset = offset;
+        event.info.delay = delay;
+        event.info.serverAddress = ntpServerIPAddress;
+        event.info.port = DEFAULT_NTP_PORT;
+        onSyncEvent (event);
     }
     // const int sizeStr = 200;
     // char strBuffer[sizeStr];
@@ -316,16 +339,27 @@ void NTPClient::getTime () {
     result = WiFi.hostByName (getNtpServerName (), ntpServerIPAddress);
     if (!result) {
         DEBUGLOG ("HostByName error %d", (int)result);
-        if (onSyncEvent)
-            onSyncEvent (invalidAddress, 0, 0);
-        return;
+
+        if (onSyncEvent) {
+            NTPEvent_t event;
+            event.event = invalidAddress;
+            event.info.serverAddress = ntpServerIPAddress;
+            event.info.port = DEFAULT_NTP_PORT;
+
+            onSyncEvent (event);        
+        }
     }
     if (ntpServerIPAddress == INADDR_NONE) {
         DEBUGLOG ("IP address unset. Aborting");
         actualInterval = shortInterval;
         DEBUGLOG ("Set interval to = %d", actualInterval);
-        if (onSyncEvent)
-            onSyncEvent (invalidAddress, 0, 0);
+        if (onSyncEvent) {
+            NTPEvent_t event;
+            event.event = invalidAddress;
+            event.info.serverAddress = ntpServerIPAddress;
+            event.info.port = DEFAULT_NTP_PORT;
+            onSyncEvent (event);
+        }
         return;
     }
     
@@ -340,14 +374,24 @@ void NTPClient::getTime () {
     result = udp_connect (udp, &ntpAddr, DEFAULT_NTP_PORT);
     if (result == ERR_USE) {
         DEBUGLOG ("Port already used");
-        if (onSyncEvent)
-            onSyncEvent (invalidPort, 0, 0);
+        if (onSyncEvent) {
+            NTPEvent_t event;
+            event.event = invalidPort;
+            event.info.serverAddress = ntpServerIPAddress;
+            event.info.port = DEFAULT_NTP_PORT;
+            onSyncEvent (event);
+        }
         //return;
     }
     if (result == ERR_RTE) {
         DEBUGLOG ("Port already used");
-        if (onSyncEvent)
-            onSyncEvent (invalidAddress, 0, 0);
+        if (onSyncEvent) {
+            NTPEvent_t event;
+            event.event = invalidAddress;
+            event.info.serverAddress = ntpServerIPAddress;
+            event.info.port = DEFAULT_NTP_PORT;
+            onSyncEvent (event);
+        }
         //return;
     }
     
@@ -362,12 +406,22 @@ void NTPClient::getTime () {
         DEBUGLOG ("NTP request error");
         status = prevStatus;
         DEBUGLOG ("Status recovered due to UDP send error");
-        if (onSyncEvent)
-            onSyncEvent (errorSending, 0, 0);
+        if (onSyncEvent) {
+            NTPEvent_t event;
+            event.event = errorSending;
+            event.info.serverAddress = ntpServerIPAddress;
+            event.info.port = DEFAULT_NTP_PORT;
+            onSyncEvent (event);
+        }
         return;
     }
-    if (onSyncEvent)
-        onSyncEvent (requestSent, 0, 0);
+    if (onSyncEvent) {
+        NTPEvent_t event;
+        event.event = requestSent;
+        event.info.serverAddress = ntpServerIPAddress;
+        event.info.port = DEFAULT_NTP_PORT;
+        onSyncEvent (event);
+    }
     udp_disconnect (udp);
     
 }
@@ -435,14 +489,19 @@ void ICACHE_RAM_ATTR NTPClient::processRequestTimeout () {
     //timer1_disable ();
     responseTimer.detach ();
     DEBUGLOG ("NTP response Timeout");
-    if (onSyncEvent)
-        onSyncEvent (noResponse, 0, 0);
+    if (onSyncEvent) {
+        NTPEvent_t event;
+        event.event = noResponse;
+        event.info.serverAddress = ntpServerIPAddress;
+        event.info.port = DEFAULT_NTP_PORT;
+        onSyncEvent (event);
+    }
     // if (status==syncd) {
     //     actualInterval = longInterval;
     // } else {
     //     actualInterval = shortInterval;
     // }
-    DEBUGLOG ("Set interval to = %d", actualInterval);
+    //DEBUGLOG ("Set interval to = %d", actualInterval);
 }
 
 bool NTPClient::setNtpServerName (const char* serverName) {

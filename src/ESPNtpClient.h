@@ -72,16 +72,7 @@ constexpr auto SECS_YR_2000 = ((time_t)(946684800UL)); // the time at the start 
 #endif
 #include <Ticker.h>
 
-typedef enum NTPSyncEvent {
-    timeSyncd = 0, // Time successfully got from NTP server
-    noResponse = -1, // No response from server
-    invalidAddress= -2, // Address not reachable
-    invalidPort = -3, // Port already used
-    requestSent = 1, // NTP request sent, waiting for response
-    errorSending = -4, // An error happened while sending the request
-    responseError = -5, // Wrong response received
-    syncError = -6 // Error adjusting time
-} NTPSyncEvent_t;
+#include "NTPEventTypes.h"
 
 typedef enum NTPStatus {
     syncd = 0, // Time synchronized correctly
@@ -111,7 +102,7 @@ typedef struct {
     timeval transmit;
 } NTPPacket_t;
 
-typedef std::function<void (NTPSyncEvent_t, double, double)> onSyncEvent_t;
+typedef std::function<void (NTPEvent_t)> onSyncEvent_t;
 
 static char strBuffer[35];
 
