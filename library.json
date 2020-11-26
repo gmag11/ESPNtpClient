@@ -16,6 +16,28 @@
       "type": "git",
       "url": "https://github.com/gmag11/ESPNtpClient.git"
     },
-  "examples": ["examples/basicExample/basicExample.ino", "examples/advancedExample/advancedExample.ino"]
+  "examples": [{
+        "name": "Basic example",
+        "base": "examples/basicExample",
+        "files": [
+            "platformio.ini",
+            "basicExample.ino"
+        ]
+    },{
+        "name": "Advanced example",
+        "base": "examples/advancedExample",
+        "files": [
+            "platformio.ini",
+            "advancedExample.ino"
+        ]
+    },
+    {
+        "name": "LED Flasher",
+        "base": "examples/ledFlasher",
+        "files": [
+            "platformio.ini",
+            "ledFlasher.ino"
+        ]
+    }]
 }
 
