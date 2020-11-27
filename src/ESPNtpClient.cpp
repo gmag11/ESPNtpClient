@@ -159,7 +159,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
     NTPPacket_t ntpPacket;
     bool offsetApplied = false;
     static bool wasPartial;
-    static double lastOffset;
+    //static double lastOffset;
     
     if (!packet) {
         DEBUGLOG ("Received packet empty");
@@ -215,7 +215,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         DEBUGLOG ("Next sync programmed for %d ms", FAST_NTP_SYNCNTERVAL);
         status = partialSync;
         wasPartial = true;
-        lastOffset = offset;
+        //lastOffset = offset;
     } else {
         DEBUGLOG ("Status set to SYNCD");
         DEBUGLOG ("Next sync programmed for %d seconds", getLongInterval ());
@@ -224,7 +224,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
             offsetApplied = true;
         }
         //Serial.printf ("Status: %d wasPartial: %d offsetApplied %d Offset %0.3f\n", status, wasPartial, offsetApplied, ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
-        //wasPartial = false;
+        wasPartial = false;
     }
     if (status == partialSync) {
         actualInterval = FAST_NTP_SYNCNTERVAL;
@@ -241,16 +241,17 @@ void NTPClient::processPacket (struct pbuf* packet) {
         NTPEvent_t event;
         if (status == partialSync){
             event.event = partlySync;
-            event.info.offset = offset;
+            //event.info.offset = offset;
         } else {
             event.event = timeSyncd;
-            if (wasPartial) {
-                event.info.offset = lastOffset;
-            } else {
-                event.info.offset = offset;
-            }
-            wasPartial = false;
+            // if (wasPartial) {
+            //     event.info.offset = lastOffset;
+            // } else {
+            //     event.info.offset = offset;
+            // }
+            // wasPartial = false;
         }
+        event.info.offset = offset;
         event.info.delay = delay;
         event.info.serverAddress = ntpServerIPAddress;
         event.info.port = DEFAULT_NTP_PORT;
