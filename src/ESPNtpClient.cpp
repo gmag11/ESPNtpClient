@@ -195,6 +195,14 @@ void NTPClient::processPacket (struct pbuf* packet) {
     timeval tvOffset = calculateOffset (&ntpPacket);
     if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < TIME_SYNC_THRESHOLD) { // Less than 1 ms
         DEBUGLOG ("Offset %0.3f ms is under threshold. Not updating", ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
+        if (onSyncEvent) {
+            NTPEvent_t event;
+            event.event = syncNotNeeded;
+            event.info.offset = (double)tvOffset.tv_sec + (double)tvOffset.tv_usec / 1000000.0;
+            event.info.serverAddress = ntpServerIPAddress;
+            event.info.port = DEFAULT_NTP_PORT;
+            onSyncEvent (event);
+        }
     } else {
         if (!adjustOffset (&tvOffset)) {
             DEBUGLOG ("Error applying offset");
@@ -823,6 +831,13 @@ char* NTPClient::ntpEvent2str (NTPEvent_t e) {
                   e.info.port,
                   e.info.offset * 1000,
                   e.info.delay * 1000);
+        break;
+    case syncNotNeeded:
+        snprintf (result, resultMaxSize, "%d: Sync not needed from %s:%u. Offset: %0.3f ms",
+                  e.event,
+                  e.info.serverAddress.toString ().c_str (),
+                  e.info.port,
+                  e.info.offset * 1000);
         break;
     case errorSending:
         snprintf (result, resultMaxSize, "%d: Error sending NTP request", e.event);

@@ -14,6 +14,7 @@ typedef enum {
     invalidPort = -3, // Port already used
     requestSent = 1, // NTP request sent, waiting for response
     partlySync = 2, // Successful sync but offset was over threshold
+    syncNotNeeded = 3, // Successful sync but offset was under minimum threshold
     errorSending = -4, // An error happened while sending the request
     responseError = -5, // Wrong response received
     syncError = -6 // Error adjusting time
