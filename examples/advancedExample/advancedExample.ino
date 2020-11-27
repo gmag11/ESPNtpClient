@@ -78,35 +78,7 @@ void onWifiEvent (WiFiEvent_t event) {
 }
 
 void processSyncEvent (NTPEvent_t ntpEvent) {
-    Serial.print ("[NTP-event] ");
-    if (ntpEvent.event < 0) {
-        Serial.printf ("Time Sync error %d: ", ntpEvent.event);
-        if (ntpEvent.event == noResponse) {
-            Serial.printf ("NTP server not reachable: %s", 
-                           ntpEvent.info.serverAddress.toString ().c_str ());
-        } else if (ntpEvent.event == invalidAddress) {
-            Serial.printf ("Invalid NTP server address: %s",
-                           ntpEvent.info.serverAddress.toString ().c_str ());
-        }
-    } else {
-        if (!ntpEvent.event) {
-            Serial.printf ("Got NTP time: %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms",
-                       NTP.getTimeDateString (NTP.getLastNTPSyncUs ()),
-                       ntpEvent.info.serverAddress.toString ().c_str (),
-                       ntpEvent.info.port,
-                       ntpEvent.info.offset * 1000, 
-                       ntpEvent.info.delay * 1000);
-        } else if (ntpEvent.event == requestSent) {
-            Serial.printf ("NTP request Sent to %s:%u",
-                           ntpEvent.info.serverAddress.toString ().c_str (),
-                           ntpEvent.info.port);        
-        } else if (ntpEvent.event == partlySync) {
-            Serial.printf ("Partial sync %s Offset %0.3f",
-                           NTP.getTimeDateString (NTP.getLastNTPSyncUs ()),
-                           ntpEvent.info.offset * 1000);
-        }
-    }
-    Serial.println ();
+    Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str (ntpEvent));
 }
 
 

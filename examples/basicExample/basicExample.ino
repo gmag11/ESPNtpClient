@@ -16,16 +16,12 @@
 
 #define SHOW_TIME_PERIOD 1000
 
-const PROGMEM char* ntpServer = "pool.ntp.org";
-
-boolean syncEventTriggered = false; // True if a time even has been triggered
-
 void setup() {
     Serial.begin (115200);
     Serial.println ();
     WiFi.begin (YOUR_WIFI_SSID, YOUR_WIFI_PASSWD);
     NTP.setTimeZone (TZ_Etc_UTC);
-    NTP.begin (ntpServer);
+    NTP.begin ();
 }
 
 void loop() {

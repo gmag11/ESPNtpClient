@@ -24,19 +24,7 @@ boolean syncEventTriggered = false; // True if a time even has been triggered
 NTPEvent_t ntpEvent; // Last triggered event
 
 void processSyncEvent (NTPEvent_t ntpEvent) {
-    //Serial.printf ("[NTP-event] %d\n", ntpEvent.event);
-    if (ntpEvent.event == timeSyncd) {
-        Serial.printf ("[NTP-event] Got NTP time: %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms\n",
-                       NTP.getTimeDateStringUs (),
-                       ntpEvent.info.serverAddress.toString ().c_str (),
-                       ntpEvent.info.port,
-                       ntpEvent.info.offset * 1000,
-                       ntpEvent.info.delay * 1000);
-    } /*else if (ntpEvent.event == partlySync) {
-        Serial.printf ("[NTP-event] Partial sync %s Offset %0.3f\n",
-                       NTP.getTimeDateStringUs (),
-                       ntpEvent.info.offset * 1000);
-    }*/
+    Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str(ntpEvent));
 }
 
 
