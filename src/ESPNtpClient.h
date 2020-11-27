@@ -270,6 +270,7 @@ public:
     void setTimeZone (const char* TZ){
         strncpy (tzname, TZ, TZNAME_LENGTH);
         setenv ("TZ", tzname, 1);
+        tzset ();
     }
     
     /**
@@ -464,6 +465,8 @@ public:
         //Serial.printf ("timeval: %ld.%ld micros %lld\n", currentTime.tv_sec, currentTime.tv_usec, microseconds);
         return microseconds;
     }
+
+    char* ntpEvent2str (NTPEvent_t e);
 
     
 };

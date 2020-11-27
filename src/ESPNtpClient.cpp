@@ -779,3 +779,66 @@ bool NTPClient::adjustOffset (timeval* offset) {
     DEBUGLOG ("Offset adjusted");
     return true;
 }
+
+char* NTPClient::ntpEvent2str (NTPEvent_t e) {
+    const int resultMaxSize = 140;
+    static char result[resultMaxSize];
+    switch (e.event) {
+    case timeSyncd:
+        snprintf (result, resultMaxSize, "%d: Got NTP time %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms",
+                  e.event,
+                  NTP.getTimeDateStringUs (),
+                  e.info.serverAddress.toString ().c_str (),
+                  e.info.port,
+                  e.info.offset * 1000,
+                  e.info.delay * 1000);
+        break;
+    case noResponse:
+        snprintf (result, resultMaxSize, "%d: No response from NTP server %s:%u",
+                  e.event,
+                  e.info.serverAddress.toString ().c_str (),
+                  e.info.port);
+        break;
+    case invalidAddress:
+        snprintf (result, resultMaxSize, "%d: Invalid address %s",
+                  e.event,
+                  e.info.serverAddress.toString ().c_str ());
+        break;
+    case invalidPort:
+        snprintf (result, resultMaxSize, "%d: Invalid port %u",
+                  e.event,
+                  e.info.port);
+        break;
+    case requestSent:
+        snprintf (result, resultMaxSize, "%d: NTP request sent to %s:%u",
+                  e.event,
+                  e.info.serverAddress.toString ().c_str (),
+                  e.info.port);
+        break;
+    case partlySync:
+        snprintf (result, resultMaxSize, "%d: Partial sync %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms",
+                  e.event,
+                  NTP.getTimeDateStringUs (),
+                  e.info.serverAddress.toString ().c_str (),
+                  e.info.port,
+                  e.info.offset * 1000,
+                  e.info.delay * 1000);
+        break;
+    case errorSending:
+        snprintf (result, resultMaxSize, "%d: Error sending NTP request", e.event);
+        break;
+    case responseError:
+        snprintf (result, resultMaxSize, "%d: NTP response error from %s:%u",
+                  e.event,
+                  e.info.serverAddress.toString ().c_str (),
+                  e.info.port);
+        break;
+    case syncError:
+        snprintf (result, resultMaxSize, "%d: Error applying sync", e.event);
+        break;
+    default:
+        snprintf (result, resultMaxSize, "%d: Unknown error", e.event);
+    }
+
+    return result;
+}
