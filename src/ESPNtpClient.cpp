@@ -354,6 +354,9 @@ void NTPClient::s_getTimeloop (void* arg) {
         }
     }
 #ifdef ESP32
+    const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
+
+    vTaskDelay (xDelay);
 }
 #endif
 
