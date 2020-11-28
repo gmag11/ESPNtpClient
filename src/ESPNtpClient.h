@@ -49,9 +49,9 @@ constexpr auto FAST_NTP_SYNCNTERVAL = 500; // Sync interval when sync has not re
 constexpr auto DEFAULT_NTP_TIMEOUT = 1500; // Default NTP timeout ms
 constexpr auto MIN_NTP_TIMEOUT = 100; // Minumum admisible ntp timeout in ms
 constexpr auto MIN_NTP_INTERVAL = 5; // Minumum NTP request interval in seconds
-constexpr auto MIN_SYNC_ACCURACY_US = 5000; // Minimum sync accuracy in us
+constexpr auto DEFAULT_MIN_SYNC_ACCURACY_US = 5000; // Minimum sync accuracy in us
 constexpr auto ESP8266_LOOP_TASK_INTERVAL = 1000; // Loop task period on ESP8266
-constexpr auto TIME_SYNC_THRESHOLD = 2500; // If calculated offset is less than this in us clock will not be corrected
+constexpr auto DEFAULT_TIME_SYNC_THRESHOLD = 2500; // If calculated offset is less than this in us clock will not be corrected
 
 constexpr auto TZNAME_LENGTH = 60; // Max TZ name description length
 constexpr auto SERVER_NAME_LENGTH = 40; // Max server name (FQDN) length
@@ -119,6 +119,8 @@ protected:
     unsigned int actualInterval = DEFAULT_NTP_SHORTINTERVAL * 1000;   ///< Currently selected interval
     onSyncEvent_t onSyncEvent;  ///< Event handler callback
     uint16_t ntpTimeout = DEFAULT_NTP_TIMEOUT; ///< Response timeout for NTP requests
+    long minSyncAccuracyUs = DEFAULT_MIN_SYNC_ACCURACY_US;
+    long timeSyncThreshold = DEFAULT_TIME_SYNC_THRESHOLD;
     NTPStatus_t status = unsyncd; ///< Sync status
     char ntpServerName[SERVER_NAME_LENGTH];  ///< Name of NTP server on Internet or LAN
     IPAddress ntpServerIPAddress;            ///< IP address of NTP server on Internet or LAN
@@ -260,13 +262,36 @@ public:
         return longInterval / 1000;
     }
 
+    /**
+    * Sets minimum sync accuracy to get a new request if offset is lower than this value
+    * @param[in] Desired minimum accuracy
+    */
+    void setMinSyncAccuracy (unsigned long accuracy) {
+        if (accuracy > DEFAULT_MIN_SYNC_ACCURACY_US) {
+            minSyncAccuracyUs = accuracy;
+        }
+    }
     
+    /**
+    * Sets tiem sync threshold. If offset is under this value time will not be adjusted
+    * @param[in] Desired sync threshold
+    */
+    void settimeSyncThreshold (unsigned long threshold) {
+        if (threshold > DEFAULT_TIME_SYNC_THRESHOLD) {
+            timeSyncThreshold = threshold;
+        }
+    }
+
     /**
     * Configure response timeout for NTP requests.
     * @param[out] error code. false if faulty.
     */
     boolean setNTPTimeout (uint16_t milliseconds);
 
+    /**
+    * Sets time zone for getting local time
+    * @param[in] Time zone description
+    */
     void setTimeZone (const char* TZ){
         strncpy (tzname, TZ, TZNAME_LENGTH);
         setenv ("TZ", tzname, 1);
