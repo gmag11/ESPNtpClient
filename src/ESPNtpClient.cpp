@@ -257,6 +257,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         NTPEvent_t event;
         if (status == partialSync){
             event.event = partlySync;
+            event.info.retrials = numSyncRetry;
             //event.info.offset = offset;
         } else {
             event.event = timeSyncd;
@@ -835,8 +836,9 @@ char* NTPClient::ntpEvent2str (NTPEvent_t e) {
                   e.info.port);
         break;
     case partlySync:
-        snprintf (result, resultMaxSize, "%d: Partial sync %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms",
+        snprintf (result, resultMaxSize, "%d: #%u Partial sync %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms",
                   e.event,
+                  e.info.retrials,
                   NTP.getTimeDateStringUs (),
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port,
