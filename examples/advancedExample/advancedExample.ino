@@ -78,7 +78,15 @@ void onWifiEvent (WiFiEvent_t event) {
 }
 
 void processSyncEvent (NTPEvent_t ntpEvent) {
-    Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str (ntpEvent));
+    switch (ntpEvent.event) {
+        case timeSyncd:
+        case partlySync:
+        case syncNotNeeded:
+            Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str (ntpEvent));
+            break;
+        default:
+            break;
+    }
 }
 
 

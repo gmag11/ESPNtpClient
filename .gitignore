@@ -7,3 +7,4 @@
 include/
 lib/
 test/
+examples/WifiConfig.h

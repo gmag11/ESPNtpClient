@@ -45,14 +45,15 @@ constexpr auto DEFAULT_NTP_SERVER = "pool.ntp.org"; // Default international NTP
 constexpr auto DEFAULT_NTP_PORT = 123; // Default local udp port. Select a different one if neccesary (usually not needed)
 constexpr auto DEFAULT_NTP_INTERVAL = 1800; // Default sync interval 30 minutes
 constexpr auto DEFAULT_NTP_SHORTINTERVAL = 15; // Sync interval when sync has not been achieved. 15 seconds
-constexpr auto FAST_NTP_SYNCNTERVAL = 500; // Sync interval when sync has not reached required accuracy in ms
+constexpr auto FAST_NTP_SYNCNTERVAL = 2000; // Sync interval when sync has not reached required accuracy in ms
 constexpr auto DEFAULT_NTP_TIMEOUT = 1500; // Default NTP timeout ms
 constexpr auto MIN_NTP_TIMEOUT = 100; // Minumum admisible ntp timeout in ms
 constexpr auto MIN_NTP_INTERVAL = 5; // Minumum NTP request interval in seconds
 constexpr auto DEFAULT_MIN_SYNC_ACCURACY_US = 5000; // Minimum sync accuracy in us
-constexpr auto DEFAULT_MAX_RESYNC_RETRY = 5; // Maximum number of sync retrials if offset is above accuravy
+constexpr auto DEFAULT_MAX_RESYNC_RETRY = 4; // Maximum number of sync retrials if offset is above accuravy
 constexpr auto ESP8266_LOOP_TASK_INTERVAL = 1000; // Loop task period on ESP8266
 constexpr auto DEFAULT_TIME_SYNC_THRESHOLD = 2500; // If calculated offset is less than this in us clock will not be corrected
+constexpr auto DEFAULT_NUM_OFFSET_AVE_ROUNDS = 3; // Number of NTP request and response rounds to calculate offset average
 
 constexpr auto TZNAME_LENGTH = 60; // Max TZ name description length
 constexpr auto SERVER_NAME_LENGTH = 40; // Max server name (FQDN) length
@@ -138,6 +139,12 @@ protected:
     double delay;
     timezone timeZone;
     char tzname[TZNAME_LENGTH];
+    
+    int64_t offsetSum;
+    int64_t offsetAve;
+    uint round = 0;
+    uint numAveRounds = DEFAULT_NUM_OFFSET_AVE_ROUNDS;
+    
 
     /**
     * Function that gets time from NTP server and convert it to Unix time format

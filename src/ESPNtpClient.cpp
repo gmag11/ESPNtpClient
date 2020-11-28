@@ -168,6 +168,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
 
     if (status != ntpRequested) {
         DEBUGLOG ("Unrequested response");
+        pbuf_free (packet);
         return;
     }
     
@@ -186,6 +187,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
             event.info.delay = 0;
             onSyncEvent (event);
         }  
+        pbuf_free (packet);
         return;
     }
 
@@ -193,6 +195,25 @@ void NTPClient::processPacket (struct pbuf* packet) {
     
     decodeNtpMessage ((uint8_t*)packet->payload, packet->len, &ntpPacket);
     timeval tvOffset = calculateOffset (&ntpPacket);
+    
+    int64_t offset_us = (int64_t)tvOffset.tv_sec * 1000000L + (int64_t)tvOffset.tv_usec;
+    offsetSum += offset_us;
+    round++;
+    offsetAve = offsetSum / round;
+    //Serial.printf ("\noffset %lld -- sum %lld -- round %u -- average %lld\n\n", offset_us, offsetSum, round, offsetAve);
+    
+    if (round >= numAveRounds) {
+        tvOffset.tv_sec = offsetAve / 1000000L;
+        tvOffset.tv_usec = offsetAve - tvOffset.tv_sec * 1000000;
+        //Serial.printf ("\nResult offset = %ld.%06ld\n\n", tvOffset.tv_sec, tvOffset.tv_usec);
+        round = 0;
+        offsetSum = 0;
+    } else {
+        actualInterval = ntpTimeout; // Set retry period equal to timeout
+        pbuf_free (packet);
+        return;
+    }
+    
     if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < timeSyncThreshold) { // Less than 1 ms
         DEBUGLOG ("Offset %0.3f ms is under threshold. Not updating", ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
         if (onSyncEvent) {
@@ -211,7 +232,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
                 event.event = syncError;
                 event.info.serverAddress = ntpServerIPAddress;
                 event.info.port = DEFAULT_NTP_PORT;
-                event.info.offset = ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000.0;
+                event.info.offset = (float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0;
                 onSyncEvent (event);
             }
         }
@@ -220,7 +241,6 @@ void NTPClient::processPacket (struct pbuf* packet) {
     }
     if (tvOffset.tv_sec != 0 || abs (tvOffset.tv_usec) > minSyncAccuracyUs) { // Offset bigger than 10 ms
         DEBUGLOG ("Minimum accuracy not reached. Repeating sync");
-        DEBUGLOG ("Next sync programmed for %d ms", FAST_NTP_SYNCNTERVAL);
         if (numSyncRetry < maxNumSyncRetry) {
             status = partialSync;
             numSyncRetry++;
@@ -243,7 +263,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         wasPartial = false;
     }
     if (status == partialSync) {
-        actualInterval = FAST_NTP_SYNCNTERVAL;
+        actualInterval = shortInterval;
     } else {
         actualInterval = longInterval;
     }
@@ -268,7 +288,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
             // }
             // wasPartial = false;
         }
-        event.info.offset = offset;
+        event.info.offset = (float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0;
         event.info.delay = delay;
         event.info.serverAddress = ntpServerIPAddress;
         event.info.port = DEFAULT_NTP_PORT;
@@ -458,7 +478,7 @@ void NTPClient::getTime () {
         event.info.port = DEFAULT_NTP_PORT;
         onSyncEvent (event);
     }
-    udp_disconnect (udp);
+    //udp_disconnect (udp);
     
 }
 
