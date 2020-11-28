@@ -25,6 +25,7 @@ typedef struct {
     double delay = 0.0;
     IPAddress serverAddress;
     unsigned int port = 0;
+    unsigned int retrials = 0;
 } NTPSyncEventInfo_t;
 
 typedef struct {
