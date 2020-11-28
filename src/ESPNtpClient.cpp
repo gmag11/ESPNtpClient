@@ -221,13 +221,21 @@ void NTPClient::processPacket (struct pbuf* packet) {
     if (tvOffset.tv_sec != 0 || abs (tvOffset.tv_usec) > minSyncAccuracyUs) { // Offset bigger than 10 ms
         DEBUGLOG ("Minimum accuracy not reached. Repeating sync");
         DEBUGLOG ("Next sync programmed for %d ms", FAST_NTP_SYNCNTERVAL);
-        status = partialSync;
-        wasPartial = true;
+        if (numSyncRetry < maxNumSyncRetry) {
+            status = partialSync;
+            numSyncRetry++;
+            wasPartial = true;
+        } else {
+            status = syncd;
+            numSyncRetry = 0;
+            wasPartial = false;
+        }
         //lastOffset = offset;
     } else {
         DEBUGLOG ("Status set to SYNCD");
         DEBUGLOG ("Next sync programmed for %d seconds", getLongInterval ());
-        status = syncd;    
+        status = syncd;
+        numSyncRetry = 0;
         if (wasPartial){
             offsetApplied = true;
         }
