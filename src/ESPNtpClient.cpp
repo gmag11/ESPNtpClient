@@ -193,7 +193,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
     
     decodeNtpMessage ((uint8_t*)packet->payload, packet->len, &ntpPacket);
     timeval tvOffset = calculateOffset (&ntpPacket);
-    if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < TIME_SYNC_THRESHOLD) { // Less than 1 ms
+    if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < timeSyncThreshold) { // Less than 1 ms
         DEBUGLOG ("Offset %0.3f ms is under threshold. Not updating", ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
         if (onSyncEvent) {
             NTPEvent_t event;
@@ -218,7 +218,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         offsetApplied = true;
 
     }
-    if (tvOffset.tv_sec != 0 || abs (tvOffset.tv_usec) > MIN_SYNC_ACCURACY_US) { // Offset bigger than 10 ms
+    if (tvOffset.tv_sec != 0 || abs (tvOffset.tv_usec) > minSyncAccuracyUs) { // Offset bigger than 10 ms
         DEBUGLOG ("Minimum accuracy not reached. Repeating sync");
         DEBUGLOG ("Next sync programmed for %d ms", FAST_NTP_SYNCNTERVAL);
         status = partialSync;
