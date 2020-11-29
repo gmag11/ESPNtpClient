@@ -7,7 +7,7 @@
 
 #ifdef ESP8266
 const char* extractFileName (const char* path);
-#define DEBUG_LINE_PREFIX() DBG_PORT.printf_P (PSTR("[%lu][%s:%d] %s() Heap: %lu | "),millis(),extractFileName(__FILE__),__LINE__,__FUNCTION__,(unsigned long)ESP.getFreeHeap())
+#define DEBUG_LINE_PREFIX() DBG_PORT.printf_P (PSTR("[%lu][%s:%d] %s() Heap: %lu | "),::millis(),extractFileName(__FILE__),__LINE__,__FUNCTION__,(unsigned long)ESP.getFreeHeap())
 #define DEBUGLOG(text,...) DEBUG_LINE_PREFIX();DBG_PORT.printf_P(PSTR(text),##__VA_ARGS__);DBG_PORT.println()
 #elif defined ESP32
 #define ARDUHAL_NTP_LOG(format)  "[%s:%u] %d %s(): " format "\r\n", pathToFileName(__FILE__), __LINE__, (unsigned long)ESP.getFreeHeap(), __FUNCTION__
@@ -146,15 +146,16 @@ bool NTPClient::begin (const char* ntpServerName) {
         CONFIG_ARDUINO_RUNNING_CORE);
     
     xTaskCreateUniversal (
-        &NTPClient::receiverTask, /* Task function. */
+        &NTPClient::s_receiverTask, /* Task function. */
         "NTP receiver", /* name of task. */
-        2048, /* Stack size of task */
+        3072, /* Stack size of task */
         this, /* parameter of the task */
         1, /* priority of the task */
         NULL, /* Task handle to keep track of created task */
         CONFIG_ARDUINO_RUNNING_CORE);
 #else
     loopTimer.attach_ms (ESP8266_LOOP_TASK_INTERVAL, &NTPClient::s_getTimeloop, (void*)this);
+    receiverTimer.attach_ms (ESP8266_RECEIVER_TASK_INTERVAL, &NTPClient::s_receiverTask, (void*)this);
 #endif
     
     DEBUGLOG ("First time sync request");
@@ -272,7 +273,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         wasPartial = false;
     }
     if (status == partialSync) {
-        actualInterval = shortInterval;
+        actualInterval = ntpTimeout; //shortInterval;
     } else {
         actualInterval = longInterval;
     }
@@ -322,20 +323,21 @@ void NTPClient::s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
     //self->processPacket (p);
 }
 
-void NTPClient::receiverTask (void* arg){
+void NTPClient::s_receiverTask (void* arg){
     NTPClient* self = reinterpret_cast<NTPClient*>(arg);
+#ifdef ESP32
     for (;;) {
+#endif
         if (self->responsePacketValid) {
             self->processPacket (self->lastNtpResponsePacket);
             pbuf_free (self->lastNtpResponsePacket);
             self->responsePacketValid = false;
         }
+#ifdef ESP32
         const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
-
         vTaskDelay (xDelay);
-    
-
     }
+#endif
 }
 
 char* NTPClient::getUptimeString () {
@@ -363,17 +365,17 @@ char* NTPClient::getUptimeString () {
 void NTPClient::s_getTimeloop (void* arg) {
 #ifdef ESP32
     for (;;) {
-#endif
+#endif // ESP32
         //DEBUGLOG ("Running periodic task");
         NTPClient* self = reinterpret_cast<NTPClient*>(arg);
         static time_t lastGotTime;
 
         if (self->isConnected) {
-            if (WiFi.isConnected()) {
+            if (WiFi.isConnected ()) {
                 if (::millis () - lastGotTime >= self->actualInterval) {
                     lastGotTime = ::millis ();
                     DEBUGLOG ("Periodic loop. Millis = %d", lastGotTime);
-                    self->getTime ();  
+                    self->getTime ();
                 }
             } else {
                 DEBUGLOG ("DISCONNECTED");
@@ -381,22 +383,22 @@ void NTPClient::s_getTimeloop (void* arg) {
                 self->isConnected = false;
             }
         } else {
-            if (WiFi.isConnected ()){
+            if (WiFi.isConnected ()) {
                 DEBUGLOG ("CONNECTED. Binding");
-                
+
                 self->udp = udp_new ();
                 if (!self->udp) {
                     DEBUGLOG ("Failed to create NTP socket");
                     return; // false;
                 }
-                
+
                 ip_addr_t localAddress;
 #ifdef ESP32
                 localAddress.u_addr.ip4.addr = WiFi.localIP ();
                 localAddress.type = IPADDR_TYPE_V4;
-#else
+#else // ESP8266
                 localAddress.addr = WiFi.localIP ();
-#endif
+#endif // ESP32
                 err_t result = udp_bind (self->udp, &localAddress, DEFAULT_NTP_PORT);
                 if (result) {
                     DEBUGLOG ("Failed to bind to NTP port. %d", result);
@@ -408,13 +410,12 @@ void NTPClient::s_getTimeloop (void* arg) {
                 self->isConnected = true;
             }
         }
-    }
 #ifdef ESP32
-    const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
-
-    vTaskDelay (xDelay);
+        const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
+        vTaskDelay (xDelay);
+    }
+#endif // ESP32
 }
-#endif
 
 void NTPClient::getTime () {
     err_t result;

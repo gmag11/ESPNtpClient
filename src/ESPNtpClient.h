@@ -51,7 +51,10 @@ constexpr auto MIN_NTP_TIMEOUT = 100; // Minumum admisible ntp timeout in ms
 constexpr auto MIN_NTP_INTERVAL = 5; // Minumum NTP request interval in seconds
 constexpr auto DEFAULT_MIN_SYNC_ACCURACY_US = 5000; // Minimum sync accuracy in us
 constexpr auto DEFAULT_MAX_RESYNC_RETRY = 4; // Maximum number of sync retrials if offset is above accuravy
-constexpr auto ESP8266_LOOP_TASK_INTERVAL = 1000; // Loop task period on ESP8266
+#ifdef ESP8266
+constexpr auto ESP8266_LOOP_TASK_INTERVAL = 500; // Loop task period on ESP8266
+constexpr auto ESP8266_RECEIVER_TASK_INTERVAL = 100; // Receiver task period on ESP8266
+#endif // ESP8266
 constexpr auto DEFAULT_TIME_SYNC_THRESHOLD = 2500; // If calculated offset is less than this in us clock will not be corrected
 constexpr auto DEFAULT_NUM_OFFSET_AVE_ROUNDS = 3; // Number of NTP request and response rounds to calculate offset average
 
@@ -121,17 +124,19 @@ protected:
     unsigned int actualInterval = DEFAULT_NTP_SHORTINTERVAL * 1000;   ///< Currently selected interval
     onSyncEvent_t onSyncEvent;  ///< Event handler callback
     uint16_t ntpTimeout = DEFAULT_NTP_TIMEOUT; ///< Response timeout for NTP requests
-    unsigned long minSyncAccuracyUs = DEFAULT_MIN_SYNC_ACCURACY_US;
+    long minSyncAccuracyUs = DEFAULT_MIN_SYNC_ACCURACY_US;
     uint maxNumSyncRetry = DEFAULT_MAX_RESYNC_RETRY;
     uint numSyncRetry;
-    unsigned long timeSyncThreshold = DEFAULT_TIME_SYNC_THRESHOLD;
+    long timeSyncThreshold = DEFAULT_TIME_SYNC_THRESHOLD;
     NTPStatus_t status = unsyncd; ///< Sync status
     char ntpServerName[SERVER_NAME_LENGTH];  ///< Name of NTP server on Internet or LAN
     IPAddress ntpServerIPAddress;            ///< IP address of NTP server on Internet or LAN
 #ifdef ESP32
     TaskHandle_t loopHandle = NULL;         ///< TimeSync loop task handle
+    TaskHandle_t receiverHandle = NULL;         ///< NTP response receiver task handle
 #else
     Ticker loopTimer;           ///< Timer to trigger timesync
+    Ticker receiverTimer;           ///< Timer to check received responses
 #endif
     Ticker responseTimer;       ///< Timer to trigger response timeout
     bool isConnected = false;
@@ -160,7 +165,7 @@ protected:
     static void s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
                               const ip_addr_t* addr, u16_t port);
     
-    static void receiverTask (void* arg);
+    static void s_receiverTask (void* arg);
     
     /**
     * Starts a NTP time request to server. Returns a time in UNIX time format. Normally only called from library.
@@ -280,9 +285,13 @@ public:
     * Sets minimum sync accuracy to get a new request if offset is greater than this value
     * @param[in] Desired minimum accuracy
     */
-    void setMinSyncAccuracy (unsigned long accuracy) {
-        if (accuracy > DEFAULT_MIN_SYNC_ACCURACY_US) {
+    void setMinSyncAccuracy (long accuracy) {
+        const int minAccuracy = 100;
+
+        if (accuracy > minAccuracy) {
             minSyncAccuracyUs = accuracy;
+        } else {
+            minSyncAccuracyUs = minAccuracy;
         }
     }
     
@@ -290,9 +299,13 @@ public:
     * Sets time sync threshold. If offset is under this value time will not be adjusted
     * @param[in] Desired sync threshold
     */
-    void settimeSyncThreshold (unsigned long threshold) {
-        if (threshold > DEFAULT_TIME_SYNC_THRESHOLD) {
+    void settimeSyncThreshold (long threshold) {
+        const int minThreshold = 100;
+        
+        if (threshold > minThreshold) {
             timeSyncThreshold = threshold;
+        } else {
+            timeSyncThreshold = minThreshold;
         }
     }
     
@@ -458,7 +471,7 @@ public:
     * @param[out] Uptime. 0 equals never.
     */
     time_t getUptime () {
-        uptime = uptime + (millis () - uptime);
+        uptime = uptime + (::millis () - uptime);
         return uptime / 1000;
     }
 

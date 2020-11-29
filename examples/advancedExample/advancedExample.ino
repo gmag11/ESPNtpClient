@@ -89,7 +89,6 @@ void processSyncEvent (NTPEvent_t ntpEvent) {
     }
 }
 
-
 void setup() {
     Serial.begin (115200);
     Serial.println ();
@@ -115,6 +114,8 @@ void loop() {
         NTP.setTimeZone (TZ_Europe_Madrid);
         NTP.setInterval (600);
         NTP.setNTPTimeout (NTP_TIMEOUT);
+        // NTP.setMinSyncAccuracy (500);
+        // NTP.settimeSyncThreshold (250);
         NTP.begin (ntpServer);
     }
 
