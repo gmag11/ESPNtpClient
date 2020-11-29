@@ -145,7 +145,9 @@ protected:
     uint round = 0;
     uint numAveRounds = DEFAULT_NUM_OFFSET_AVE_ROUNDS;
     
-
+    pbuf* lastNtpResponsePacket;
+    bool responsePacketValid = false;
+    
     /**
     * Function that gets time from NTP server and convert it to Unix time format
     * @param[in]  NTPClient instance
@@ -157,6 +159,8 @@ protected:
     */
     static void s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
                               const ip_addr_t* addr, u16_t port);
+    
+    static void receiverTask (void* arg);
     
     /**
     * Starts a NTP time request to server. Returns a time in UNIX time format. Normally only called from library.

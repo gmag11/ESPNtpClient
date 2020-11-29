@@ -139,10 +139,19 @@ bool NTPClient::begin (const char* ntpServerName) {
     xTaskCreateUniversal (
         &NTPClient::s_getTimeloop, /* Task function. */
         "NTP receiver", /* name of task. */
-        4096, /* Stack size of task */
+        2048, /* Stack size of task */
         this, /* parameter of the task */
         1, /* priority of the task */
         &loopHandle, /* Task handle to keep track of created task */
+        CONFIG_ARDUINO_RUNNING_CORE);
+    
+    xTaskCreateUniversal (
+        &NTPClient::receiverTask, /* Task function. */
+        "NTP receiver", /* name of task. */
+        2048, /* Stack size of task */
+        this, /* parameter of the task */
+        1, /* priority of the task */
+        NULL, /* Task handle to keep track of created task */
         CONFIG_ARDUINO_RUNNING_CORE);
 #else
     loopTimer.attach_ms (ESP8266_LOOP_TASK_INTERVAL, &NTPClient::s_getTimeloop, (void*)this);
@@ -168,7 +177,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
 
     if (status != ntpRequested) {
         DEBUGLOG ("Unrequested response");
-        pbuf_free (packet);
+        //pbuf_free (packet);
         return;
     }
     
@@ -187,7 +196,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
             event.info.delay = 0;
             onSyncEvent (event);
         }  
-        pbuf_free (packet);
+        //pbuf_free (packet);
         return;
     }
 
@@ -210,7 +219,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         offsetSum = 0;
     } else {
         actualInterval = ntpTimeout; // Set retry period equal to timeout
-        pbuf_free (packet);
+        //pbuf_free (packet);
         return;
     }
     
@@ -297,7 +306,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
     // const int sizeStr = 200;
     // char strBuffer[sizeStr];
     // DEBUGLOG ("NTP Packet\n%s", dumpNTPPacket ((byte*)(packet->payload), packet->len, strBuffer, sizeStr));
-    pbuf_free (packet);
+    //pbuf_free (packet);
 
 }
 
@@ -308,7 +317,25 @@ void NTPClient::s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
     NTPClient* self = reinterpret_cast<NTPClient*>(arg);
     gettimeofday (&(self->packetLastReceived), NULL);
     DEBUGLOG ("NTP Packet received from %s:%d", ipaddr_ntoa (addr), port);
-    self->processPacket (p);
+    self->lastNtpResponsePacket = p;
+    self->responsePacketValid = true;
+    //self->processPacket (p);
+}
+
+void NTPClient::receiverTask (void* arg){
+    NTPClient* self = reinterpret_cast<NTPClient*>(arg);
+    for (;;) {
+        if (self->responsePacketValid) {
+            self->processPacket (self->lastNtpResponsePacket);
+            pbuf_free (self->lastNtpResponsePacket);
+            self->responsePacketValid = false;
+        }
+        const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
+
+        vTaskDelay (xDelay);
+    
+
+    }
 }
 
 char* NTPClient::getUptimeString () {
