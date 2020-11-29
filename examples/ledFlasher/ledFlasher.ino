@@ -47,7 +47,7 @@ void loop () {
     timeval currentTime;
     gettimeofday (&currentTime, NULL);
     int64_t us = NTP.micros () % 1000000L;
-    digitalWrite (LED_BUILTIN, !(us >= 0 && us < 10000));
+    digitalWrite (LED_BUILTIN, !((us >= 0 && us < 10000) || (us >= 150000 && us < 160000)));
     if (syncEventTriggered) {
         syncEventTriggered = false;
         processSyncEvent (ntpEvent);
