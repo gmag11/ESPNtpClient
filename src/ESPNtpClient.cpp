@@ -35,9 +35,13 @@ const char* IRAM_ATTR extractFileName (const char* path) {
 }
 #endif
 
+  /**
+    * @brief NTP Timestamp Format
+    * The prime epoch, or base date of era 0, is 0 h 1 January 1900 UTC, when all bits are zero
+    */
 typedef struct {
-    int32_t secondsOffset;
-    uint32_t fraction;
+    int32_t secondsOffset; ///< @brief 32-bit seconds field spanning 136 years since 1-Jan-1900 00:00 UTC
+    uint32_t fraction; ///< @brief 32-bit fraction field resolving 232 picoseconds (1/2^32)
 } timestamp_t;
 
 typedef struct __attribute__ ((packed, aligned (1))) {
@@ -647,7 +651,7 @@ return true;
 }
 
 
-boolean NTPClient::setNTPTimeout (uint16_t milliseconds) {
+bool NTPClient::setNTPTimeout (uint16_t milliseconds) {
 
     if (milliseconds >= MIN_NTP_TIMEOUT) {
         ntpTimeout = milliseconds;
@@ -760,6 +764,8 @@ NTPPacket_t* NTPClient::decodeNtpMessage (uint8_t* messageBuffer, size_t length,
     //DEBUGLOG ("Transmit: seconds %08X fraction %08X", recPacket.transmit.secondsOffset, recPacket.transmit.fraction);
     //DEBUGLOG ("Transmit: %d.%06ld", decPacket->transmit.tv_sec, decPacket->transmit.tv_usec);
     DEBUGLOG ("Transmit: %s.%06ld", ctime (&(decPacket->transmit.tv_sec)), decPacket->transmit.tv_usec);
+    
+    decPacket->destination = packetLastReceived;
 
     return decPacket;
 }
@@ -772,8 +778,7 @@ timeval NTPClient::calculateOffset (NTPPacket_t* ntpPacket) {
     t1 = ntpPacket->origin.tv_sec + ntpPacket->origin.tv_usec / 1000000.0;
     t2 = ntpPacket->receive.tv_sec + ntpPacket->receive.tv_usec / 1000000.0;
     t3 = ntpPacket->transmit.tv_sec + ntpPacket->transmit.tv_usec / 1000000.0;
-    //gettimeofday (&currenttime,NULL);
-    t4 = packetLastReceived.tv_sec + packetLastReceived.tv_usec / 1000000.0;
+    t4 = ntpPacket->destination.tv_sec + ntpPacket->destination.tv_usec / 1000000.0;
     offset = ((t2 - t1) / 2.0 + (t3 - t4) / 2.0); // in seconds
     delay = (t4 - t1) - (t3 - t2); // in seconds
 
@@ -784,8 +789,8 @@ timeval NTPClient::calculateOffset (NTPPacket_t* ntpPacket) {
     //DEBUGLOG ("T2: %016X  %016X", ntpPacket->receive.tv_sec, ntpPacket->receive.tv_usec);
     DEBUGLOG ("T3: %s", getTimeDateString (ntpPacket->transmit));
     //DEBUGLOG ("T3: %016X  %016X", ntpPacket->transmit.tv_sec, ntpPacket->transmit.tv_usec);
-    DEBUGLOG ("T4: %s", getTimeDateString (packetLastReceived));
-    //DEBUGLOG ("T4: %016X  %016X", packetLastReceived.tv_sec, packetLastReceived.tv_usec);
+    DEBUGLOG ("T4: %s", getTimeDateString (ntpPacket->destination));
+    //DEBUGLOG ("T4: %016X  %016X", ntpPacket->destination.tv_sec, ntpPacket->destination.tv_usec);
     DEBUGLOG ("Offset: %f, Delay: %f", offset, delay);
 
     //DEBUGLOG ("Current time: %d.%d", currenttime.tv_sec, currenttime.tv_usec);

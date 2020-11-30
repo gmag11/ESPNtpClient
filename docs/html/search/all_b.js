@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['noresponse_70',['noResponse',['../NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152ad322fce90458bd3112a92bca2439287e',1,'NTPEventTypes.h']]],
+  ['ntp_71',['NTP',['../ESPNtpClient_8cpp.html#a10953f00acc9c54a2371691d10e32a57',1,'NTP():&#160;ESPNtpClient.cpp'],['../ESPNtpClient_8h.html#a10953f00acc9c54a2371691d10e32a57',1,'NTP():&#160;ESPNtpClient.cpp']]],
+  ['ntp_5fpacket_5fsize_72',['NTP_PACKET_SIZE',['../ESPNtpClient_8h.html#a79dcb9747083bff5ee2ed05247f5e094',1,'ESPNtpClient.h']]],
+  ['ntp_5ftimeout_73',['NTP_TIMEOUT',['../advancedExample_8ino.html#a576b30e69bec539d7c7838cad785b324',1,'advancedExample.ino']]],
+  ['ntpclient_74',['NTPClient',['../classNTPClient.html',1,'']]],
+  ['ntpevent_75',['ntpEvent',['../advancedExample_8ino.html#afda0e57d1eef1a218a44397c29a88885',1,'ntpEvent():&#160;advancedExample.ino'],['../ledFlasher_8ino.html#afda0e57d1eef1a218a44397c29a88885',1,'ntpEvent():&#160;ledFlasher.ino']]],
+  ['ntpevent2str_76',['ntpEvent2str',['../classNTPClient.html#ad5e7080156ce027d0b8686fce645e14c',1,'NTPClient']]],
+  ['ntpevent_5ft_77',['NTPEvent_t',['../structNTPEvent__t.html',1,'']]],
+  ['ntpeventtypes_2eh_78',['NTPEventTypes.h',['../NTPEventTypes_8h.html',1,'']]],
+  ['ntpflags_5ft_79',['NTPFlags_t',['../structNTPFlags__t.html',1,'']]],
+  ['ntppacket_5ft_80',['NTPPacket_t',['../structNTPPacket__t.html',1,'']]],
+  ['ntprequested_81',['ntpRequested',['../ESPNtpClient_8h.html#aeb8b025505183f78dd68c428f897f549aa050fae20a2d1e5e306b761f0dc2a688',1,'ESPNtpClient.h']]],
+  ['ntpserver_82',['ntpServer',['../advancedExample_8ino.html#a752895aa06a97c3166e73ef25b2135ef',1,'ntpServer():&#160;advancedExample.ino'],['../ledFlasher_8ino.html#a752895aa06a97c3166e73ef25b2135ef',1,'ntpServer():&#160;ledFlasher.ino']]],
+  ['ntpserveripaddress_83',['ntpServerIPAddress',['../classNTPClient.html#ab166bde13addb2bbe840ef41832dc321',1,'NTPClient']]],
+  ['ntpservername_84',['ntpServerName',['../classNTPClient.html#a16c1d51a7e29bc38f336f7c54bc9d148',1,'NTPClient']]],
+  ['ntpstatus_85',['NTPStatus',['../ESPNtpClient_8h.html#aeb8b025505183f78dd68c428f897f549',1,'ESPNtpClient.h']]],
+  ['ntpstatus_5ft_86',['NTPStatus_t',['../ESPNtpClient_8h.html#a8dd79002fdff254f755a9c4298c190dc',1,'ESPNtpClient.h']]],
+  ['ntpsynceventinfo_5ft_87',['NTPSyncEventInfo_t',['../structNTPSyncEventInfo__t.html',1,'']]],
+  ['ntpsynceventtype_5ft_88',['NTPSyncEventType_t',['../NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152',1,'NTPEventTypes.h']]],
+  ['ntptimeout_89',['ntpTimeout',['../classNTPClient.html#a2a29ceecad7c04618e73d41a78674418',1,'NTPClient']]],
+  ['ntpundecodedpacket_5ft_90',['NTPUndecodedPacket_t',['../ESPNtpClient_8cpp.html#aaacab2c3d11b1c71ca873492349f57d7',1,'ESPNtpClient.cpp']]],
+  ['numaverounds_91',['numAveRounds',['../classNTPClient.html#af235a651b350cb3fc4681dff3fa74e2d',1,'NTPClient']]],
+  ['numsyncretry_92',['numSyncRetry',['../classNTPClient.html#a6511dc00fe7783f8fdbb655c199908aa',1,'NTPClient']]]
+];
