@@ -50,7 +50,7 @@ constexpr auto MIN_NTP_TIMEOUT = 100; ///< @brief Minumum admisible ntp timeout 
 constexpr auto MIN_NTP_INTERVAL = 5; ///< @brief Minumum NTP request interval in seconds
 constexpr auto DEFAULT_MIN_SYNC_ACCURACY_US = 5000; ///< @brief Minimum sync accuracy in us
 constexpr auto DEFAULT_MAX_RESYNC_RETRY = 4; ///< @brief Maximum number of sync retrials if offset is above accuravy
-#ifdef ESP8266 || defined __DOXYGEN__
+#ifdef ESP8266
 constexpr auto ESP8266_LOOP_TASK_INTERVAL = 500; ///< @brief Loop task period on ESP8266
 constexpr auto ESP8266_RECEIVER_TASK_INTERVAL = 100; ///< @brief Receiver task period on ESP8266
 #endif // ESP8266
@@ -243,11 +243,10 @@ protected:
     NTPStatus_t status = unsyncd;   ///< @brief Sync status
     char ntpServerName[SERVER_NAME_LENGTH];                         ///< @brief  of NTP server on Internet or LAN
     IPAddress ntpServerIPAddress;   ///< @brief  IP address of NTP server on Internet or LAN
-#if defined ESP32 || defined __DOXYGEN__
+#ifdef ESP32
     TaskHandle_t loopHandle = NULL;                                 ///< @brief TimeSync loop task handle
     TaskHandle_t receiverHandle = NULL;                             ///< @brief NTP response receiver task handle
-#endif
-#if defined ESP8266 || defined __DOXYGEN__
+#else
     Ticker loopTimer;               ///< @brief Timer to trigger timesync
     Ticker receiverTimer;           ///< @brief Timer to check received responses
 #endif
@@ -363,22 +362,14 @@ public:
         if (lastNtpResponsePacket){
             pbuf_free (lastNtpResponsePacket);
         }
-#if defined ESP32 || defined __DOXYGEN__
+#ifdef ESP32
         vTaskDelete (loopHandle);
         vTaskDelete (receiverHandle);
-#endif // ESP32
-#if defined ESP8266 || defined __DOXYGEN__
-        if (loopTimer.active ()) {
-            loopTimer.detach ();
-    }
-        if (receiverTimer.active ()) {
-            receiverTimer.detach ();
-        }
+#else
+        loopTimer.detach ();
+        receiverTimer.detach ();
 #endif // ESP8266
-
-        if (responseTimer.active()){
-            responseTimer.detach ();
-        }
+        responseTimer.detach ();
     }
 
     /**
