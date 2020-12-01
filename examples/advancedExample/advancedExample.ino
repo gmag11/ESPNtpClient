@@ -82,6 +82,7 @@ void processSyncEvent (NTPEvent_t ntpEvent) {
         case timeSyncd:
         case partlySync:
         case syncNotNeeded:
+        case accuracyError:
             Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str (ntpEvent));
             break;
         default:

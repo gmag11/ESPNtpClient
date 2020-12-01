@@ -20,7 +20,8 @@ typedef enum {
     syncNotNeeded = 3, /**< Successful sync but offset was under minimum threshold */
     errorSending = -4, /**< An error happened while sending the request */
     responseError = -5, /**< Wrong response received */
-    syncError = -6 /**< Error adjusting time */
+    syncError = -6, /**< Error adjusting time */
+    accuracyError = -7 /**< NTP server time is not accurate enough */
 } NTPSyncEventType_t;
 
 /**
@@ -29,6 +30,7 @@ typedef enum {
 typedef struct {
     double offset = 0.0; /**< Last offset applied */
     double delay = 0.0; /**< Last calculates round trip delay to NTP server */
+    float dispersion = 0.0;
     IPAddress serverAddress; /**< NTP server IP address */
     unsigned int port = 0; /**< NTP port used */
     unsigned int retrials = 0; /**< Number of resync retrials until time was got with required accuracy */

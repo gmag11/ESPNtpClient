@@ -42,20 +42,26 @@ const char* IRAM_ATTR extractFileName (const char* path) {
 typedef struct {
     int32_t secondsOffset; ///< @brief 32-bit seconds field spanning 136 years since 1-Jan-1900 00:00 UTC
     uint32_t fraction; ///< @brief 32-bit fraction field resolving 232 picoseconds (1/2^32)
-} timestamp_t;
+} timestamp64_t;
+
+typedef struct {
+    int16_t secondsOffset; ///< @brief 32-bit seconds field spanning 136 years since 1-Jan-1900 00:00 UTC
+    uint16_t fraction; ///< @brief 32-bit fraction field resolving 232 picoseconds (1/2^32)
+} timestamp32_t;
+
 
 typedef struct __attribute__ ((packed, aligned (1))) {
     uint8_t flags;
     uint8_t peerStratum;
     uint8_t pollingInterval;
-    uint8_t clockPrecission;
-    uint32_t rootDelay;
-    uint32_t dispersion;
+    int8_t clockPrecission;
+    timestamp32_t rootDelay;
+    timestamp32_t dispersion;
     uint8_t refID[4];
-    timestamp_t reference;
-    timestamp_t origin;
-    timestamp_t receive;
-    timestamp_t transmit;
+    timestamp64_t reference;
+    timestamp64_t origin;
+    timestamp64_t receive;
+    timestamp64_t transmit;
 } NTPUndecodedPacket_t;
 
 NTPClient NTP;
@@ -73,6 +79,20 @@ int32_t flipInt32 (int32_t number) {
 
     //DEBUGLOG ("Output number %08X", *(int32_t*)output);
     int32_t *result = (int32_t*)output;
+    return *result;
+}
+
+int16_t flipInt16 (int16_t number) {
+    uint8_t output[sizeof (int16_t)];
+    uint8_t* input = (uint8_t*)&number;
+    //DEBUGLOG ("Input number %08X", number);
+
+    for (unsigned int i = 1; i <= sizeof (int16_t); i++) {
+        output[i - 1] = input[sizeof (int16_t) - i];
+    }
+
+    //DEBUGLOG ("Output number %08X", *(int32_t*)output);
+    int16_t* result = (int16_t*)output;
     return *result;
 }
 
@@ -180,11 +200,13 @@ void NTPClient::processPacket (struct pbuf* packet) {
     }
     DEBUGLOG ("Data lenght %d", packet->len);
 
-    if (status != ntpRequested) {
+    if (!ntpRequested) {
         DEBUGLOG ("Unrequested response");
         //pbuf_free (packet);
         return;
     }
+    
+    ntpRequested = false;
     
     if (packet->len < NTP_PACKET_SIZE) {
         DEBUGLOG ("Response Error");
@@ -207,14 +229,17 @@ void NTPClient::processPacket (struct pbuf* packet) {
 
     responseTimer.detach ();
     
-    decodeNtpMessage ((uint8_t*)packet->payload, packet->len, &ntpPacket);
+    if (!decodeNtpMessage ((uint8_t*)packet->payload, packet->len, &ntpPacket)){
+        DEBUGLOG ("Null pointer packet");
+        return;
+    }
     timeval tvOffset = calculateOffset (&ntpPacket);
     
     int64_t offset_us = (int64_t)tvOffset.tv_sec * 1000000L + (int64_t)tvOffset.tv_usec;
     offsetSum += offset_us;
     round++;
     offsetAve = offsetSum / round;
-    //Serial.printf ("\noffset %lld -- sum %lld -- round %u -- average %lld\n\n", offset_us, offsetSum, round, offsetAve);
+    DEBUGLOG ("offset %lld -- sum %lld -- round %u -- average %lld", offset_us, offsetSum, round, offsetAve);
     
     if (round >= numAveRounds) {
         tvOffset.tv_sec = offsetAve / 1000000L;
@@ -228,31 +253,95 @@ void NTPClient::processPacket (struct pbuf* packet) {
         return;
     }
     
-    if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < timeSyncThreshold) { // Less than 1 ms
-        DEBUGLOG ("Offset %0.3f ms is under threshold. Not updating", ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
-        if (onSyncEvent) {
-            NTPEvent_t event;
-            event.event = syncNotNeeded;
-            event.info.offset = (double)tvOffset.tv_sec + (double)tvOffset.tv_usec / 1000000.0;
-            event.info.serverAddress = ntpServerIPAddress;
-            event.info.port = DEFAULT_NTP_PORT;
-            onSyncEvent (event);
-        }
-    } else {
-        if (!adjustOffset (&tvOffset)) {
-            DEBUGLOG ("Error applying offset");
+    if (abs (offsetAve) < timeSyncThreshold) {
+        DEBUGLOG ("Offset under threshold. Not updating");
+        status = syncd;
+        numDispersionErrors = 0;
+        actualInterval = longInterval;
+        numSyncRetry = 0;
+        DEBUGLOG ("Offset %0.3f ms is under threshold %ld. Not updating", offsetAve / 1000.0, timeSyncThreshold);
+        if (wasPartial){
+            wasPartial = false;
             if (onSyncEvent) {
                 NTPEvent_t event;
-                event.event = syncError;
+                event.event = timeSyncd;
+                event.info.offset = offsetAve / 1000000.0;
                 event.info.serverAddress = ntpServerIPAddress;
                 event.info.port = DEFAULT_NTP_PORT;
-                event.info.offset = (float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0;
+                event.info.delay = delay;
+                event.info.dispersion = ntpPacket.dispersion;
+                onSyncEvent (event);
+            }
+
+        } else {
+            if (onSyncEvent) {
+                NTPEvent_t event;
+                event.event = syncNotNeeded;
+                event.info.offset = offsetAve / 1000000.0;
+                event.info.dispersion = ntpPacket.dispersion;
+                event.info.serverAddress = ntpServerIPAddress;
+                event.info.port = DEFAULT_NTP_PORT;
                 onSyncEvent (event);
             }
         }
-        offsetApplied = true;
-
+        return;
     }
+        
+    if (!checkNTPresponse (&ntpPacket, offsetAve)) {
+        numDispersionErrors++;
+        DEBUGLOG ("Not valid or inaccurate response #%d", numDispersionErrors);
+        if (numDispersionErrors > maxDispersionErrors) {
+            numDispersionErrors = 0;
+            
+            if (onSyncEvent) {
+                NTPEvent_t event;
+                event.event = accuracyError;
+                event.info.offset = offsetAve / 1000000.0;
+                event.info.dispersion = ntpPacket.dispersion;
+                event.info.serverAddress = ntpServerIPAddress;
+                event.info.port = DEFAULT_NTP_PORT;
+                onSyncEvent (event);
+            }
+                            
+            // if (status == syncd) {
+            //     actualInterval = longInterval;
+            // } else {
+            actualInterval = shortInterval;
+            // }
+            DEBUGLOG ("Status = %s. Next sync in %d seconds", status == syncd ? "SYNCD" : "UNSYNCD", actualInterval);
+        }
+        return;
+    } else {
+        numDispersionErrors = 0;
+        DEBUGLOG ("Valid NTP response");
+    }
+
+    
+    // if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < timeSyncThreshold) { // Less than 1 s
+    //     DEBUGLOG ("Offset %0.3f ms is under threshold. Not updating", ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
+    //     if (onSyncEvent) {
+    //         NTPEvent_t event;
+    //         event.event = syncNotNeeded;
+    //         event.info.offset = (double)tvOffset.tv_sec + (double)tvOffset.tv_usec / 1000000.0;
+    //         event.info.serverAddress = ntpServerIPAddress;
+    //         event.info.port = DEFAULT_NTP_PORT;
+    //         onSyncEvent (event);
+    //     }
+    // } else {
+    if (!adjustOffset (&tvOffset)) {
+        DEBUGLOG ("Error applying offset");
+        if (onSyncEvent) {
+            NTPEvent_t event;
+            event.event = syncError;
+            event.info.serverAddress = ntpServerIPAddress;
+            event.info.port = DEFAULT_NTP_PORT;
+            event.info.offset = (float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0;
+            onSyncEvent (event);
+        }
+    }
+    offsetApplied = true;
+
+    // }
     if (tvOffset.tv_sec != 0 || abs (tvOffset.tv_usec) > minSyncAccuracyUs) { // Offset bigger than 10 ms
         DEBUGLOG ("Minimum accuracy not reached. Repeating sync");
         if (numSyncRetry < maxNumSyncRetry) {
@@ -264,6 +353,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
             numSyncRetry = 0;
             wasPartial = false;
         }
+        ///////return;
         //lastOffset = offset;
     } else {
         DEBUGLOG ("Status set to SYNCD");
@@ -304,6 +394,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         }
         event.info.offset = (float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0;
         event.info.delay = delay;
+        event.info.dispersion = ntpPacket.dispersion;
         event.info.serverAddress = ntpServerIPAddress;
         event.info.port = DEFAULT_NTP_PORT;
         onSyncEvent (event);
@@ -485,7 +576,7 @@ void NTPClient::getTime () {
     
     DEBUGLOG ("Sending UDP packet");
     NTPStatus_t prevStatus = status;
-    status = ntpRequested;
+    ntpRequested = true;
     DEBUGLOG ("Status set to REQUESTED");
     responseTimer.once_ms (ntpTimeout, &NTPClient::s_processRequestTimeout, static_cast<void*>(this));
     
@@ -532,17 +623,19 @@ boolean NTPClient::sendNTPpacket () {
     packet.flags = 0b11100011;
     packet.peerStratum = 0;
     packet.pollingInterval = 6;
-    packet.clockPrecission = 0xEC;
+    packet.clockPrecission = 0xEC; // 1 us
 
     gettimeofday (&currentime, NULL);
+    
+    DEBUGLOG ("sendNTPpacket");
     
     if (currentime.tv_sec != 0) {
         packet.transmit.secondsOffset = flipInt32 (currentime.tv_sec + seventyYears);
         DEBUGLOG ("Current time: %ld.%ld", currentime.tv_sec, currentime.tv_usec);
-        uint32_t timestamp_us = (double)(currentime.tv_usec) / 1000000.0 * (double)0x100000000;
-        DEBUGLOG ("timestamp_us = %d", timestamp_us);
+        uint32_t timestamp_us = (uint32_t)((double)(currentime.tv_usec) / 1000000.0 * (double)0x100000000);
+        DEBUGLOG ("timestamp_us = 0x%08X %lu", timestamp_us, timestamp_us);
         packet.transmit.fraction = flipInt32 (timestamp_us);
-        DEBUGLOG ("Transmit: %d : %d", packet.transmit.secondsOffset, packet.transmit.fraction);
+        DEBUGLOG ("Transmit: 0x%08X : 0x%08X", packet.transmit.secondsOffset, packet.transmit.fraction);
         
     } else {
         packet.transmit.secondsOffset = 0;
@@ -555,6 +648,7 @@ boolean NTPClient::sendNTPpacket () {
     DEBUGLOG ("NTP Packet\n%s", dumpNTPPacket ((uint8_t*)&packet, sizeof (NTPUndecodedPacket_t), strPacketBuffer, sizeStr));
 #endif
 
+    DEBUGLOG ("Sendign packet");
     memcpy (buffer->payload, &packet, sizeof (NTPUndecodedPacket_t));
     result = udp_send (udp, buffer);
     pbuf_free (buffer);
@@ -575,6 +669,7 @@ void ICACHE_RAM_ATTR NTPClient::processRequestTimeout () {
     status = unsyncd;
     DEBUGLOG ("Status set to UNSYNCD");
     //timer1_disable ();
+    ntpRequested = false;
     responseTimer.detach ();
     DEBUGLOG ("NTP response Timeout");
     if (onSyncEvent) {
@@ -663,6 +758,27 @@ bool NTPClient::setNTPTimeout (uint16_t milliseconds) {
 
 }
 
+void NTPClient::dumpNtpPacketInfo (NTPPacket_t* decPacket) {
+    Serial.print ("------ Decoded NTP message -------\n");
+    Serial.printf ("LI = %u\n", decPacket->flags.li);
+    Serial.printf ("Version = %u\n", decPacket->flags.vers);
+    Serial.printf ("Mode = %u\n", decPacket->flags.mode);
+    Serial.printf ("Peer Stratum = %u\n", decPacket->peerStratum);
+    Serial.printf ("Polling Interval = %u s\n", decPacket->pollingInterval);
+    Serial.printf ("Clock Precission = %0.3f us\n", decPacket->clockPrecission * 1000000.0);
+    Serial.printf ("Root delay: %0.3f ms\n", decPacket->rootDelay * 1000.0);
+    Serial.printf ("Dispersion: %0.3f ms\n", decPacket->dispersion * 1000.0);
+    if (decPacket->peerStratum > 1) {
+        Serial.printf ("refID: %u.%u.%u.%u\n", decPacket->refID[0], decPacket->refID[1], decPacket->refID[2], decPacket->refID[3]);
+    } else {
+        Serial.printf ("refID: %.*s\n", 4, (char*)(decPacket->refID));
+    }
+    Serial.printf ("Reference: %s\n", getTimeDateString (decPacket->reference));
+    Serial.printf ("Origin: %s\n", getTimeDateString (decPacket->origin));
+    Serial.printf ("Receive: %s\n", getTimeDateString (decPacket->receive));
+    Serial.printf ("Transmit: %s\n", getTimeDateString (decPacket->transmit));
+}
+
 NTPPacket_t* NTPClient::decodeNtpMessage (uint8_t* messageBuffer, size_t length, NTPPacket_t* decPacket) {
     NTPUndecodedPacket_t recPacket;
     int32_t timestamp_s;
@@ -692,21 +808,30 @@ NTPPacket_t* NTPClient::decodeNtpMessage (uint8_t* messageBuffer, size_t length,
     decPacket->peerStratum = recPacket.peerStratum;
     DEBUGLOG ("Peer Stratum = %u", decPacket->peerStratum);
 
-    decPacket->pollingInterval = recPacket.pollingInterval;
-    DEBUGLOG ("Polling Interval = 0x%02X", decPacket->pollingInterval);
+    decPacket->pollingInterval = pow(2, recPacket.pollingInterval);
+    DEBUGLOG ("Polling Interval = %u", decPacket->pollingInterval);
 
-    decPacket->clockPrecission = recPacket.clockPrecission;
-    DEBUGLOG ("Clock Precission = 0x%02X", decPacket->clockPrecission);
+    decPacket->clockPrecission = pow(2,recPacket.clockPrecission);
+    DEBUGLOG ("Clock Precission = %0.3f us", decPacket->clockPrecission * 1000000);
 
-    decPacket->rootDelay = flipInt32 (recPacket.rootDelay);
-    DEBUGLOG ("Root delay: 0x%08X", decPacket->rootDelay);
+    int16_t ts16_s = flipInt16 (recPacket.rootDelay.secondsOffset);
+    uint16_t ts16_us = flipInt16 (recPacket.rootDelay.fraction);
+    decPacket->rootDelay = (float)ts16_s + (float)ts16_us / (float)0x10000;
+    DEBUGLOG ("Root delay: 0x%08X", recPacket.rootDelay);
+    DEBUGLOG ("Root delay: %0.3f ms", decPacket->rootDelay * 1000);
 
-    decPacket->dispersion = flipInt32 (recPacket.dispersion);
-    DEBUGLOG ("Dispersion: 0x%08X", decPacket->dispersion);
+    ts16_s = flipInt16 (recPacket.dispersion.secondsOffset);
+    ts16_us = flipInt16 (recPacket.dispersion.fraction);
+    decPacket->dispersion = (float)ts16_s + (float)ts16_us / (float)0x10000;
+    DEBUGLOG ("Dispersion: 0x%08X", recPacket.dispersion);
+    DEBUGLOG ("Dispersion: %0.3f ms", decPacket->dispersion * 1000);
 
     memcpy (&(decPacket->refID), &(recPacket.refID), 4);
-    DEBUGLOG ("refID: %u.%u.%u.%u", decPacket->refID[0], decPacket->refID[1], decPacket->refID[2], decPacket->refID[3]);
-    DEBUGLOG ("refID: %.*s", 4, (char*)(decPacket->refID));
+    if (decPacket->peerStratum > 1) {
+        DEBUGLOG ("refID: %u.%u.%u.%u", decPacket->refID[0], decPacket->refID[1], decPacket->refID[2], decPacket->refID[3]);
+    } else {
+        DEBUGLOG ("refID: %.*s", 4, (char*)(decPacket->refID));
+    }
 
     // Reference timestamp
     timestamp_s = flipInt32 (recPacket.reference.secondsOffset);
@@ -767,7 +892,50 @@ NTPPacket_t* NTPClient::decodeNtpMessage (uint8_t* messageBuffer, size_t length,
     
     decPacket->destination = packetLastReceived;
 
+    // if (checkNTPresponse (decPacket)) {
     return decPacket;
+    // } else return NULL;
+}
+
+bool NTPClient::checkNTPresponse (NTPPacket_t* ntpPacket, int64_t offsetUs) {
+    //dumpNtpPacketInfo (ntpPacket);
+    if (ntpPacket->flags.li!=0){
+        DEBUGLOG ("Leap indicator error: %d", ntpPacket->flags.li);
+        return false;
+    }
+    
+    if (ntpPacket->flags.vers != 4) {
+        DEBUGLOG ("NTP version error: %d", ntpPacket->flags.vers);
+        return false;
+    }
+
+    if (ntpPacket->flags.mode != 4) {
+        DEBUGLOG ("NTP mode error: %d", ntpPacket->flags.mode);
+        return false;
+    }
+    
+    if (ntpPacket->peerStratum < 1 || ntpPacket->peerStratum > 15) {
+        DEBUGLOG ("Peer stratum error: %d", ntpPacket->peerStratum);
+        return false;
+    }
+
+    if (status == syncd || status == partialSync) {
+        //Serial.printf ("Peer precission:   %0.9f s\n", ntpPacket->clockPrecission);
+        //Serial.printf ("minSyncAccuracyUs: %0.9f s\n", minSyncAccuracyUs / 10000000.0);
+        if (ntpPacket->clockPrecission > (float)(minSyncAccuracyUs / 10000000.0)/* || ntpPacket->clockPrecission == 0.0*/) { // 5 zeroes, that's correct. us*1000000 / 10
+            DEBUGLOG ("Peer precission error: %0.3f us > minSyncAccuracyUs/10 %0.3f", ntpPacket->clockPrecission * 1000000.0, minSyncAccuracyUs / 10.0);
+            return false;
+        }
+
+        //Serial.printf ("Dispersion:        %0.6f s\n", ntpPacket->dispersion);
+        //Serial.printf ("Offset:            %0.6f s\n", offsetUs / 1000000.0);
+        if (ntpPacket->dispersion > abs(offsetUs / 1000000.0) || ntpPacket->dispersion == 0.0) {
+            DEBUGLOG ("Dispersion error: %0.3f ms > Offset: %0.3f ms", ntpPacket->dispersion * 1000.0, (float)(offsetUs / 1000.0));
+            return false;
+        }    
+    }
+
+    return true;
 }
 
 timeval NTPClient::calculateOffset (NTPPacket_t* ntpPacket) {
@@ -841,7 +1009,7 @@ bool NTPClient::adjustOffset (timeval* offset) {
     }
     //Serial.printf ("millis() offset 1: %lld\n", currenttime_us / 1000 - millis ());
     //Serial.printf ("millis() offset 2: %lld\n", newtime_us / 1000 - millis ());
-    DEBUGLOG ("Diferencia: %lld", (newtime_us - currenttime_us));
+    DEBUGLOG ("Offset: %lld", (newtime_us - currenttime_us));
     //Serial.printf ("Requested offset %ld.%ld\n", offset->tv_sec, offset->tv_usec);
     //Serial.printf ("Requested new time %ld.%ld\n", newtime.tv_sec, newtime.tv_usec);
     //Serial.printf ("Requested new time %s\n", ctime (&(newtime.tv_sec)));
@@ -854,17 +1022,18 @@ bool NTPClient::adjustOffset (timeval* offset) {
 }
 
 char* NTPClient::ntpEvent2str (NTPEvent_t e) {
-    const int resultMaxSize = 140;
+    const int resultMaxSize = 150;
     static char result[resultMaxSize];
     switch (e.event) {
     case timeSyncd:
-        snprintf (result, resultMaxSize, "%d: Got NTP time %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms",
+        snprintf (result, resultMaxSize, "%d:    Got NTP time %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms. Dispersion: %0.3f ms",
                   e.event,
                   NTP.getTimeDateStringUs (),
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port,
                   e.info.offset * 1000,
-                  e.info.delay * 1000);
+                  e.info.delay * 1000,
+                  e.info.dispersion * 1000);
         break;
     case noResponse:
         snprintf (result, resultMaxSize, "%d: No response from NTP server %s:%u",
@@ -889,21 +1058,31 @@ char* NTPClient::ntpEvent2str (NTPEvent_t e) {
                   e.info.port);
         break;
     case partlySync:
-        snprintf (result, resultMaxSize, "%d: #%u Partial sync %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms",
+        snprintf (result, resultMaxSize, "%d: #%u Partial sync %s from %s:%u. Offset: %0.3f ms. Delay: %0.3f ms. Dispersion: %0.3f ms",
                   e.event,
                   e.info.retrials,
                   NTP.getTimeDateStringUs (),
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port,
                   e.info.offset * 1000,
-                  e.info.delay * 1000);
+                  e.info.delay * 1000,
+                  e.info.dispersion * 1000);
         break;
-    case syncNotNeeded:
-        snprintf (result, resultMaxSize, "%d: Sync not needed from %s:%u. Offset: %0.3f ms",
+    case accuracyError:
+        snprintf (result, resultMaxSize, "%d: Accuracy error from %s:%u. Offset: %0.3f ms. Dispersion: %0.3f ms",
                   e.event,
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port,
-                  e.info.offset * 1000);
+                  e.info.offset * 1000,
+                  e.info.dispersion * 1000);
+        break;
+    case syncNotNeeded:
+        snprintf (result, resultMaxSize, "%d: Sync not needed from %s:%u. Offset: %0.3f ms. Dispersion: %0.3f ms",
+                  e.event,
+                  e.info.serverAddress.toString ().c_str (),
+                  e.info.port,
+                  e.info.offset * 1000,
+                  e.info.dispersion * 1000);
         break;
     case errorSending:
         snprintf (result, resultMaxSize, "%d: Error sending NTP request", e.event);

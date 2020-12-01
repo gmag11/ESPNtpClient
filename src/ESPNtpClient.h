@@ -85,8 +85,8 @@ constexpr auto SECS_YR_2000 = ((time_t)(946684800UL)); ///< @brief The time at t
 typedef enum NTPStatus {
     syncd = 0, // Time synchronized correctly
     unsyncd = -1, // Time may not be valid
-    ntpRequested = 1, // NTP request sent, waiting for response
-    partialSync = 2 // NPT is synchronised but precission is below threshold
+    //ntpRequested = 1, // NTP request sent, waiting for response
+    partialSync = 1 // NPT is synchronised but precission is below threshold
 } NTPStatus_t; // Only for internal library use
 
   /**
@@ -145,12 +145,12 @@ typedef struct {
     uint8_t peerStratum;
     
      /**
-      * @brief 8-bit signed integer representing the maximum interval between
-      * successive messages, in log2 seconds
-      * 
-      * Suggested default limits for minimum and maximum poll intervals are 6 and 10, respectively
+      * @brief Maximum interval between successive messages, in seconds.
+      *
+      * Calculated from 8-bit signed integer representing log2 value. Suggested default limits for 
+      * minimum and maximum poll intervals are 6 and 10, what represent 64 to 1024 seconds, respectively
       */
-    uint8_t pollingInterval;
+    uint32_t pollingInterval;
     
     /**
       * @brief 8-bit signed integer representing the precision of the
@@ -160,10 +160,11 @@ typedef struct {
       * The precision can be determined when the service first starts up as the minimum
       * time of several iterations to read the system clock
       */
-    uint8_t clockPrecission;
+    float clockPrecission;
        
-    uint32_t rootDelay; ///< @brief Total round-trip delay to the reference clock, in NTP short format
-    uint32_t dispersion; ///< @brief Total dispersion to the reference clock, in NTP short format
+    float rootDelay; ///< @brief Total round-trip delay to the reference clock
+    
+    float dispersion; ///< @brief Total dispersion to the reference clock
     
      /**
       * @brief 32-bit code identifying the particular server or reference clock
@@ -229,6 +230,7 @@ protected:
     timeval lastSyncd;              ///< @brief Stored time of last successful sync
     timeval firstSync;              ///< @brief Stored time of first successful sync after boot
     timeval packetLastReceived;     ///< @brief Moment when a NTP response has arrived
+    bool ntpRequested = false;      ///< @brief Indicates that a NTP response is pending
     unsigned long uptime = 0;       ///< @brief Time since boot
     unsigned int shortInterval = DEFAULT_NTP_SHORTINTERVAL * 1000;  ///< @brief Interval to set periodic time sync until first synchronization.
     unsigned int longInterval = DEFAULT_NTP_INTERVAL * 1000;        ///< @brief Interval to set periodic time sync
@@ -238,6 +240,8 @@ protected:
     long minSyncAccuracyUs = DEFAULT_MIN_SYNC_ACCURACY_US;          ///< @brief Timeout configuration to wait for NTP response
     uint maxNumSyncRetry = DEFAULT_MAX_RESYNC_RETRY;                ///< @brief Number of resync repetitions if minimum accuracy has not been reached
     uint numSyncRetry;              ///< @brief Current resync repetition
+    uint maxDispersionErrors = DEFAULT_MAX_RESYNC_RETRY;            ///< @brief TODO
+    uint numDispersionErrors;
     long timeSyncThreshold = DEFAULT_TIME_SYNC_THRESHOLD;           ///< @brief If calculated offset is below this threshold it will not be applied. 
                                                                     //            This is to avoid continious innecesary glitches in clock
     NTPStatus_t status = unsyncd;   ///< @brief Sync status
@@ -289,14 +293,20 @@ protected:
     static void s_receiverTask (void* arg);
     
     /**
-    * Starts a NTP time request to server. Returns a time in UNIX time format. Normally only called from library.
-    * Kept in public section to allow direct NTP request.
-    */
-    /**
       * @brief Starts a NTP time request to server. Returns a time in UNIX time format. Normally only called from library.
       *         Kept in public section to allow direct NTP request.
       */
     void getTime ();
+    
+    /**
+      * @brief Checks if received packet may be used to get a good sync
+      * @param ntpPacket Packet to analyze
+      * @param offsetUs Microseconds offset, used to check dispersion
+      * @return `true` if NTP packet is good for sync
+      */
+    bool checkNTPresponse (NTPPacket_t* ntpPacket, int64_t offsetUs);
+    
+    void dumpNtpPacketInfo (NTPPacket_t* decPacket);
     
     /**
       * @brief Static method to call NTP response timeout processor
