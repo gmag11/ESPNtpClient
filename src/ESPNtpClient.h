@@ -49,7 +49,7 @@ constexpr auto DEFAULT_NTP_TIMEOUT = 1500; ///< @brief Default NTP timeout ms
 constexpr auto MIN_NTP_TIMEOUT = 100; ///< @brief Minumum admisible ntp timeout in ms
 constexpr auto MIN_NTP_INTERVAL = 5; ///< @brief Minumum NTP request interval in seconds
 constexpr auto DEFAULT_MIN_SYNC_ACCURACY_US = 5000; ///< @brief Minimum sync accuracy in us
-constexpr auto DEFAULT_MAX_RESYNC_RETRY = 4; ///< @brief Maximum number of sync retrials if offset is above accuravy
+constexpr auto DEFAULT_MAX_RESYNC_RETRY = 3; ///< @brief Maximum number of sync retrials if offset is above accuravy
 #ifdef ESP8266
 constexpr auto ESP8266_LOOP_TASK_INTERVAL = 500; ///< @brief Loop task period on ESP8266
 constexpr auto ESP8266_RECEIVER_TASK_INTERVAL = 100; ///< @brief Receiver task period on ESP8266
@@ -476,9 +476,9 @@ public:
       * @param maxRetry Max sync retrials number
       */
     void setMaxNumSyncRetry (unsigned long maxRetry) {
-        if (maxRetry > DEFAULT_MAX_RESYNC_RETRY) {
+        //if (maxRetry > DEFAULT_MAX_RESYNC_RETRY) {
             maxNumSyncRetry = maxRetry;
-        }
+        //}
     }
 
     /**
