@@ -115,8 +115,8 @@ void loop() {
         NTP.setTimeZone (TZ_Europe_Madrid);
         NTP.setInterval (600);
         NTP.setNTPTimeout (NTP_TIMEOUT);
-        // NTP.setMinSyncAccuracy (500);
-        // NTP.settimeSyncThreshold (250);
+        // NTP.setMinSyncAccuracy (750);
+        // NTP.settimeSyncThreshold (500);
         NTP.begin (ntpServer);
     }
 

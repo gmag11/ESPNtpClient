@@ -44,9 +44,14 @@ typedef struct {
     uint32_t fraction; ///< @brief 32-bit fraction field resolving 232 picoseconds (1/2^32)
 } timestamp64_t;
 
+  /**
+    * @brief Short NTP Timestamp Format
+    * 
+    * Used for precission, dispersion, etc
+    */
 typedef struct {
-    int16_t secondsOffset; ///< @brief 32-bit seconds field spanning 136 years since 1-Jan-1900 00:00 UTC
-    uint16_t fraction; ///< @brief 32-bit fraction field resolving 232 picoseconds (1/2^32)
+    int16_t secondsOffset; ///< @brief 16-bit seconds field spanning 18 hours
+    uint16_t fraction; ///< @brief 16-bit fraction field resolving 15.3 microseconds (1/2^16)
 } timestamp32_t;
 
 
@@ -97,8 +102,6 @@ int16_t flipInt16 (int16_t number) {
 }
 
 char* dumpNTPPacket (byte* data, size_t length, char* buffer, int len) {
-    //byte *data = packet.data ();
-    //size_t length = packet.length ();
     int remaining = len - 1;
     int index = 0;
     int written;
@@ -158,7 +161,7 @@ bool NTPClient::begin (const char* ntpServerName) {
     
     DEBUGLOG ("Time sync started");
     
-    //Start loop() task
+    //Start loop and receiver tasks
 #ifdef ESP32
     xTaskCreateUniversal (
         &NTPClient::s_getTimeloop, /* Task function. */
@@ -193,7 +196,6 @@ void NTPClient::processPacket (struct pbuf* packet) {
     NTPPacket_t ntpPacket;
     bool offsetApplied = false;
     static bool wasPartial;
-    //static double lastOffset;
     
     if (!packet) {
         DEBUGLOG ("Received packet empty");
@@ -211,9 +213,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
     if (packet->len < NTP_PACKET_SIZE) {
         DEBUGLOG ("Response Error");
         status = unsyncd;
-        // actualInterval = shortInterval;
-        // DEBUGLOG ("Set interval to = %d", actualInterval);
-        // DEBUGLOG ("Status set to UNSYNCD");
+        DEBUGLOG ("Status set to UNSYNCD");
         if (onSyncEvent) {
             NTPEvent_t event;
             event.event = responseError;
@@ -249,7 +249,6 @@ void NTPClient::processPacket (struct pbuf* packet) {
         offsetSum = 0;
     } else {
         actualInterval = ntpTimeout; // Set retry period equal to timeout
-        //pbuf_free (packet);
         return;
     }
     
@@ -316,18 +315,6 @@ void NTPClient::processPacket (struct pbuf* packet) {
         DEBUGLOG ("Valid NTP response");
     }
 
-    
-    // if (tvOffset.tv_sec == 0 && abs (tvOffset.tv_usec) < timeSyncThreshold) { // Less than 1 s
-    //     DEBUGLOG ("Offset %0.3f ms is under threshold. Not updating", ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
-    //     if (onSyncEvent) {
-    //         NTPEvent_t event;
-    //         event.event = syncNotNeeded;
-    //         event.info.offset = (double)tvOffset.tv_sec + (double)tvOffset.tv_usec / 1000000.0;
-    //         event.info.serverAddress = ntpServerIPAddress;
-    //         event.info.port = DEFAULT_NTP_PORT;
-    //         onSyncEvent (event);
-    //     }
-    // } else {
     if (!adjustOffset (&tvOffset)) {
         DEBUGLOG ("Error applying offset");
         if (onSyncEvent) {
@@ -341,7 +328,6 @@ void NTPClient::processPacket (struct pbuf* packet) {
     }
     offsetApplied = true;
 
-    // }
     if (tvOffset.tv_sec != 0 || abs (tvOffset.tv_usec) > minSyncAccuracyUs) { // Offset bigger than 10 ms
         DEBUGLOG ("Minimum accuracy not reached. Repeating sync");
         if (numSyncRetry < maxNumSyncRetry) {
@@ -353,8 +339,6 @@ void NTPClient::processPacket (struct pbuf* packet) {
             numSyncRetry = 0;
             wasPartial = false;
         }
-        ///////return;
-        //lastOffset = offset;
     } else {
         DEBUGLOG ("Status set to SYNCD");
         DEBUGLOG ("Next sync programmed for %d seconds", getLongInterval ());
@@ -385,12 +369,6 @@ void NTPClient::processPacket (struct pbuf* packet) {
             //event.info.offset = offset;
         } else {
             event.event = timeSyncd;
-            // if (wasPartial) {
-            //     event.info.offset = lastOffset;
-            // } else {
-            //     event.info.offset = offset;
-            // }
-            // wasPartial = false;
         }
         event.info.offset = (float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0;
         event.info.delay = delay;
@@ -399,11 +377,6 @@ void NTPClient::processPacket (struct pbuf* packet) {
         event.info.port = DEFAULT_NTP_PORT;
         onSyncEvent (event);
     }
-    // const int sizeStr = 200;
-    // char strBuffer[sizeStr];
-    // DEBUGLOG ("NTP Packet\n%s", dumpNTPPacket ((byte*)(packet->payload), packet->len, strBuffer, sizeStr));
-    //pbuf_free (packet);
-
 }
 
 void NTPClient::s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
@@ -415,7 +388,6 @@ void NTPClient::s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
     DEBUGLOG ("NTP Packet received from %s:%d", ipaddr_ntoa (addr), port);
     self->lastNtpResponsePacket = p;
     self->responsePacketValid = true;
-    //self->processPacket (p);
 }
 
 void NTPClient::s_receiverTask (void* arg){
@@ -440,7 +412,6 @@ char* NTPClient::getUptimeString () {
     uint8_t hours;
     uint8_t minutes;
     uint8_t seconds;
-    //static char strbuffer[28];
 
     time_t uptime = getUptime ();
 
@@ -560,7 +531,6 @@ void NTPClient::getTime () {
             event.info.port = DEFAULT_NTP_PORT;
             onSyncEvent (event);
         }
-        //return;
     }
     if (result == ERR_RTE) {
         DEBUGLOG ("Port already used");
@@ -571,7 +541,6 @@ void NTPClient::getTime () {
             event.info.port = DEFAULT_NTP_PORT;
             onSyncEvent (event);
         }
-        //return;
     }
     
     DEBUGLOG ("Sending UDP packet");
@@ -668,7 +637,6 @@ void ICACHE_RAM_ATTR NTPClient::s_processRequestTimeout (void* arg) {
 void ICACHE_RAM_ATTR NTPClient::processRequestTimeout () {
     status = unsyncd;
     DEBUGLOG ("Status set to UNSYNCD");
-    //timer1_disable ();
     ntpRequested = false;
     responseTimer.detach ();
     DEBUGLOG ("NTP response Timeout");
@@ -892,9 +860,7 @@ NTPPacket_t* NTPClient::decodeNtpMessage (uint8_t* messageBuffer, size_t length,
     
     decPacket->destination = packetLastReceived;
 
-    // if (checkNTPresponse (decPacket)) {
     return decPacket;
-    // } else return NULL;
 }
 
 bool NTPClient::checkNTPresponse (NTPPacket_t* ntpPacket, int64_t offsetUs) {
@@ -941,7 +907,6 @@ bool NTPClient::checkNTPresponse (NTPPacket_t* ntpPacket, int64_t offsetUs) {
 timeval NTPClient::calculateOffset (NTPPacket_t* ntpPacket) {
     double t1, t2, t3, t4;
     timeval tv_offset;
-    //timeval currenttime;
 
     t1 = ntpPacket->origin.tv_sec + ntpPacket->origin.tv_usec / 1000000.0;
     t2 = ntpPacket->receive.tv_sec + ntpPacket->receive.tv_usec / 1000000.0;
@@ -961,9 +926,6 @@ timeval NTPClient::calculateOffset (NTPPacket_t* ntpPacket) {
     //DEBUGLOG ("T4: %016X  %016X", ntpPacket->destination.tv_sec, ntpPacket->destination.tv_usec);
     DEBUGLOG ("Offset: %f, Delay: %f", offset, delay);
 
-    //DEBUGLOG ("Current time: %d.%d", currenttime.tv_sec, currenttime.tv_usec);
-    //DEBUGLOG ("Current time: %s", ctime (&(currenttime.tv_sec)));
-
     tv_offset.tv_sec = (time_t)offset;
     tv_offset.tv_usec = (offset - (double)tv_offset.tv_sec) * 1000000.0;
 
@@ -975,10 +937,6 @@ timeval NTPClient::calculateOffset (NTPPacket_t* ntpPacket) {
 bool NTPClient::adjustOffset (timeval* offset) {
     timeval newtime;
     timeval currenttime;
-    //timeval _offset;
-
-    //_offset.tv_sec = offset->tv_sec;
-    //_offset.tv_usec = offset->tv_usec;
 
     gettimeofday (&currenttime, NULL);
 
@@ -1036,23 +994,23 @@ char* NTPClient::ntpEvent2str (NTPEvent_t e) {
                   e.info.dispersion * 1000);
         break;
     case noResponse:
-        snprintf (result, resultMaxSize, "%d: No response from NTP server %s:%u",
+        snprintf (result, resultMaxSize, "%d:   No response from NTP server %s:%u",
                   e.event,
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port);
         break;
     case invalidAddress:
-        snprintf (result, resultMaxSize, "%d: Invalid address %s",
+        snprintf (result, resultMaxSize, "%d:   Invalid address %s",
                   e.event,
                   e.info.serverAddress.toString ().c_str ());
         break;
     case invalidPort:
-        snprintf (result, resultMaxSize, "%d: Invalid port %u",
+        snprintf (result, resultMaxSize, "%d:   Invalid port %u",
                   e.event,
                   e.info.port);
         break;
     case requestSent:
-        snprintf (result, resultMaxSize, "%d: NTP request sent to %s:%u",
+        snprintf (result, resultMaxSize, "%d:    NTP request sent to %s:%u",
                   e.event,
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port);
@@ -1069,7 +1027,7 @@ char* NTPClient::ntpEvent2str (NTPEvent_t e) {
                   e.info.dispersion * 1000);
         break;
     case accuracyError:
-        snprintf (result, resultMaxSize, "%d: Accuracy error from %s:%u. Offset: %0.3f ms. Dispersion: %0.3f ms",
+        snprintf (result, resultMaxSize, "%d:   Accuracy error from %s:%u. Offset: %0.3f ms. Dispersion: %0.3f ms",
                   e.event,
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port,
@@ -1077,7 +1035,7 @@ char* NTPClient::ntpEvent2str (NTPEvent_t e) {
                   e.info.dispersion * 1000);
         break;
     case syncNotNeeded:
-        snprintf (result, resultMaxSize, "%d: Sync not needed from %s:%u. Offset: %0.3f ms. Dispersion: %0.3f ms",
+        snprintf (result, resultMaxSize, "%d:    Sync not needed from %s:%u. Offset: %0.3f ms. Dispersion: %0.3f ms",
                   e.event,
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port,
@@ -1085,19 +1043,19 @@ char* NTPClient::ntpEvent2str (NTPEvent_t e) {
                   e.info.dispersion * 1000);
         break;
     case errorSending:
-        snprintf (result, resultMaxSize, "%d: Error sending NTP request", e.event);
+        snprintf (result, resultMaxSize, "%d:   Error sending NTP request", e.event);
         break;
     case responseError:
-        snprintf (result, resultMaxSize, "%d: NTP response error from %s:%u",
+        snprintf (result, resultMaxSize, "%d:   NTP response error from %s:%u",
                   e.event,
                   e.info.serverAddress.toString ().c_str (),
                   e.info.port);
         break;
     case syncError:
-        snprintf (result, resultMaxSize, "%d: Error applying sync", e.event);
+        snprintf (result, resultMaxSize, "%d:   Error applying sync", e.event);
         break;
     default:
-        snprintf (result, resultMaxSize, "%d: Unknown error", e.event);
+        snprintf (result, resultMaxSize, "%d:   Unknown error", e.event);
     }
 
     return result;

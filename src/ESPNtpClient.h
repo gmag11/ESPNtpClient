@@ -85,7 +85,6 @@ constexpr auto SECS_YR_2000 = ((time_t)(946684800UL)); ///< @brief The time at t
 typedef enum NTPStatus {
     syncd = 0, // Time synchronized correctly
     unsyncd = -1, // Time may not be valid
-    //ntpRequested = 1, // NTP request sent, waiting for response
     partialSync = 1 // NPT is synchronised but precission is below threshold
 } NTPStatus_t; // Only for internal library use
 
@@ -240,7 +239,7 @@ protected:
     long minSyncAccuracyUs = DEFAULT_MIN_SYNC_ACCURACY_US;          ///< @brief Timeout configuration to wait for NTP response
     uint maxNumSyncRetry = DEFAULT_MAX_RESYNC_RETRY;                ///< @brief Number of resync repetitions if minimum accuracy has not been reached
     uint numSyncRetry;              ///< @brief Current resync repetition
-    uint maxDispersionErrors = DEFAULT_MAX_RESYNC_RETRY;            ///< @brief TODO
+    uint maxDispersionErrors = DEFAULT_MAX_RESYNC_RETRY;            ///< @brief Number of resync repetitions if server has a dispersion value bigger than offset absolute value
     uint numDispersionErrors;
     long timeSyncThreshold = DEFAULT_TIME_SYNC_THRESHOLD;           ///< @brief If calculated offset is below this threshold it will not be applied. 
                                                                     //            This is to avoid continious innecesary glitches in clock
@@ -293,12 +292,6 @@ protected:
     static void s_receiverTask (void* arg);
     
     /**
-      * @brief Starts a NTP time request to server. Returns a time in UNIX time format. Normally only called from library.
-      *         Kept in public section to allow direct NTP request.
-      */
-    void getTime ();
-    
-    /**
       * @brief Checks if received packet may be used to get a good sync
       * @param ntpPacket Packet to analyze
       * @param offsetUs Microseconds offset, used to check dispersion
@@ -306,6 +299,10 @@ protected:
       */
     bool checkNTPresponse (NTPPacket_t* ntpPacket, int64_t offsetUs);
     
+    /**
+      * @brief Write NTP packet data to Serial monitor
+      * @param ntpPacket Packet to analyze
+      */
     void dumpNtpPacketInfo (NTPPacket_t* decPacket);
     
     /**
@@ -381,6 +378,13 @@ public:
 #endif // ESP8266
         responseTimer.detach ();
     }
+    
+    /**
+      * @brief Starts a NTP time request to server. Only called from library, normally.
+      * 
+      * Kept in public section to allow direct NTP request.
+      */
+    void getTime ();
 
     /**
       * @brief Starts time synchronization
@@ -486,9 +490,7 @@ public:
       * @param maxRetry Max sync retrials number
       */
     void setMaxNumSyncRetry (unsigned long maxRetry) {
-        //if (maxRetry > DEFAULT_MAX_RESYNC_RETRY) {
             maxNumSyncRetry = maxRetry;
-        //}
     }
 
     /**
@@ -658,11 +660,6 @@ public:
     * @return First sync time
     */
     time_t getFirstSync () {
-        // if (!firstSync) {
-        //     if (timeStatus () == timeSet) {
-        //         firstSync = time (NULL) - getUptime ();
-        //     }
-        // }
         return firstSync.tv_sec;
     }
     
