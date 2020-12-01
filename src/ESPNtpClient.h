@@ -477,7 +477,7 @@ public:
       */
     void setMaxNumSyncRetry (unsigned long maxRetry) {
         if (maxRetry > DEFAULT_MAX_RESYNC_RETRY) {
-            numSyncRetry = maxRetry;
+            maxNumSyncRetry = maxRetry;
         }
     }
 
