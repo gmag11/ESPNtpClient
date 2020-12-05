@@ -1,3 +1,5 @@
+[![PlatformIO](https://github.com/gmag11/ESPNtpClient/workflows/PlatformIO/badge.svg)](https://github.com/gmag11/ESPNtpClient/actions/)
+
 # ESPNtpClient
 
 There are many NTP client libraries around. All them have different implementations for time tracking. Indeed I developed one of them. It is called [NTPClientLib](https://github.com/gmag11/NtpClient) and was intended to be as easy to use as possible while offering a wide range of features, including multiplatform support (ESP8266, ESP32, Arduino MKR1000, Arduino UNO with Ethernet shield). Since that I moved all my projects to ESP8266 and ESP32.
