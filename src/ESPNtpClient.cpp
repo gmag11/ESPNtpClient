@@ -499,7 +499,7 @@ void NTPClient::getTime () {
             onSyncEvent (event);        
         }
     }
-    if (ntpServerIPAddress == INADDR_NONE) {
+    if (ntpServerIPAddress == IPAddress(INADDR_NONE)) {
         DEBUGLOG ("IP address unset. Aborting");
         actualInterval = shortInterval;
         DEBUGLOG ("Set interval to = %d", actualInterval);
