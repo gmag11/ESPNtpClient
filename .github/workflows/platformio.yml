@@ -33,10 +33,12 @@ jobs:
           mv examples/basicExample/basicExample.ino examples/basicExample/basicExample.cpp
           mv examples/ledFlasher/ledFlasher.ino examples/ledFlasher/ledFlasher.cpp
           # cd examples/platformio/
-          # pio run -e advanced_esp32 
+          pio run -e advanced_esp32 
           pio run -e advanced_esp8266
           pio run -e esp32_basic_example
-          # -e esp8266_basic_example -e esp32_led_flasher -e esp8266_led_flasher
+          pio run -e esp8266_basic_example 
+          pio run -e esp32_led_flasher 
+          pio run -e esp8266_led_flasher
           # mv examples/advancedExample/advancedExample.cpp examples/advancedExample/advancedExample.ino
           # mv examples/basicExample/basicExample.cpp examples/basicExample/basicExample.ino
           # mv examples/ledFlasher/ledFlasher.cpp examples/ledFlasher/ledFlasher.ino
