@@ -29,12 +29,12 @@ jobs:
           platformio update
       - name: Build test
         run: |
-          mv examples/advancedExample.ino examples/advancedExample.cpp
-          mv examples/basicExample.ino examples/basicExample.cpp
-          mv examples/ledFlasher.ino examples/ledFlasher.cpp
+          mv examples/advancedExample/advancedExample.ino examples/advancedExample/advancedExample.cpp
+          mv examples/basicExample/basicExample.ino examples/basicExample/basicExample.cpp
+          mv examples/ledFlasher/ledFlasher.ino examples/ledFlasher/ledFlasher.cpp
           # cd examples/platformio/
           pio run
-          mv examples/advancedExample.cpp examples/advancedExample.ino
-          mv examples/basicExample.cpp examples/basicExample.ino
-          mv examples/ledFlasher.cpp examples/ledFlasher.ino
+          mv examples/advancedExample/advancedExample.cpp examples/advancedExample/advancedExample.ino
+          mv examples/basicExample/basicExample.cpp examples/basicExample/basicExample.ino
+          mv examples/ledFlasher/ledFlasher.cpp examples/ledFlasher/ledFlasher.ino
       
