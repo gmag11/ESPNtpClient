@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['clockprecission_236',['clockPrecission',['../structNTPPacket__t.html#af02e6a91922b0b8b28010e50364347d9',1,'NTPPacket_t']]]
+  ['clockprecission_250',['clockPrecission',['../structNTPPacket__t.html#a203d167320b5f457eaad4c5c2287a601',1,'NTPPacket_t']]]
 ];

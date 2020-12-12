@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="ESPNTPClient-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">ESPNtpClient
-   &#160;<span id="projectnumber">0.1.0</span>
+   &#160;<span id="projectnumber">0.2.2</span>
    </div>
    <div id="projectbrief">Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32</div>
   </td>
@@ -102,7 +102,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152ac06aaa57cac54353be73a9da80d3c5eb">errorSending</a> = -4, 
 <br />
 &#160;&#160;<a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152a044d7bd6ef21be6dee8e32423ca69f7c">responseError</a> = -5, 
-<a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152a86e97631b6120a747c7b8a860d310100">syncError</a> = -6
+<a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152a86e97631b6120a747c7b8a860d310100">syncError</a> = -6, 
+<a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152ad7b34aa1ebe2a19c2c7de4844e8b4862">accuracyError</a> = -7
 <br />
  }</td></tr>
 <tr class="memdesc:ab04a3f38407e6839ce1edc75ae02f152"><td class="mdescLeft">&#160;</td><td class="mdescRight">NTP event codes.  <a href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152">More...</a><br /></td></tr>
@@ -142,6 +143,8 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="ab04a3f38407e6839ce1edc75ae02f152a044d7bd6ef21be6dee8e32423ca69f7c"></a>responseError&#160;</td><td class="fielddoc"><p>Wrong response received </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ab04a3f38407e6839ce1edc75ae02f152a86e97631b6120a747c7b8a860d310100"></a>syncError&#160;</td><td class="fielddoc"><p>Error adjusting time </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ab04a3f38407e6839ce1edc75ae02f152ad7b34aa1ebe2a19c2c7de4844e8b4862"></a>accuracyError&#160;</td><td class="fielddoc"><p>NTP server time is not accurate enough </p>
 </td></tr>
 </table>
 

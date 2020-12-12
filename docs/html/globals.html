@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="ESPNTPClient-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">ESPNtpClient
-   &#160;<span id="projectnumber">0.1.0</span>
+   &#160;<span id="projectnumber">0.2.2</span>
    </div>
    <div id="projectbrief">Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32</div>
   </td>
@@ -69,6 +69,13 @@ $(function() {
 <h3><a id="index__5F"></a>- _ -</h3><ul>
 <li>__attribute__()
 : <a class="el" href="ESPNtpClient_8cpp.html#a942ca748a0c3a7b8b4478ffc6074e0e9">ESPNtpClient.cpp</a>
+</li>
+</ul>
+
+
+<h3><a id="index_a"></a>- a -</h3><ul>
+<li>accuracyError
+: <a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152ad7b34aa1ebe2a19c2c7de4844e8b4862">NTPEventTypes.h</a>
 </li>
 </ul>
 
@@ -127,6 +134,9 @@ $(function() {
 <li>FAST_NTP_SYNCNTERVAL
 : <a class="el" href="ESPNtpClient_8h.html#a47dfdf92e081ffd69ae4e81378bca43a">ESPNtpClient.h</a>
 </li>
+<li>flipInt16()
+: <a class="el" href="ESPNtpClient_8cpp.html#a13517d74eb9c1f4403c13782bf4c329f">ESPNtpClient.cpp</a>
+</li>
 <li>flipInt32()
 : <a class="el" href="ESPNtpClient_8cpp.html#a004437ce9f8976c43a4453a91718a424">ESPNtpClient.cpp</a>
 </li>
@@ -148,9 +158,10 @@ $(function() {
 : <a class="el" href="ledFlasher_8ino.html#a450a7c16ead7b3c7b882536b08f30a00">ledFlasher.ino</a>
 </li>
 <li>loop()
-: <a class="el" href="advancedExample_8ino.html#afe461d27b9c48d5921c00d521181f12f">advancedExample.ino</a>
-, <a class="el" href="basicExample_8ino.html#afe461d27b9c48d5921c00d521181f12f">basicExample.ino</a>
+: <a class="el" href="main_8cpp.html#afe461d27b9c48d5921c00d521181f12f">main.cpp</a>
 , <a class="el" href="ledFlasher_8ino.html#afe461d27b9c48d5921c00d521181f12f">ledFlasher.ino</a>
+, <a class="el" href="basicExample_8ino.html#afe461d27b9c48d5921c00d521181f12f">basicExample.ino</a>
+, <a class="el" href="advancedExample_8ino.html#afe461d27b9c48d5921c00d521181f12f">advancedExample.ino</a>
 </li>
 </ul>
 
@@ -178,17 +189,17 @@ $(function() {
 </li>
 <li>NTP_TIMEOUT
 : <a class="el" href="advancedExample_8ino.html#a576b30e69bec539d7c7838cad785b324">advancedExample.ino</a>
+, <a class="el" href="main_8cpp.html#a576b30e69bec539d7c7838cad785b324">main.cpp</a>
 </li>
 <li>ntpEvent
-: <a class="el" href="advancedExample_8ino.html#afda0e57d1eef1a218a44397c29a88885">advancedExample.ino</a>
+: <a class="el" href="main_8cpp.html#afda0e57d1eef1a218a44397c29a88885">main.cpp</a>
+, <a class="el" href="advancedExample_8ino.html#afda0e57d1eef1a218a44397c29a88885">advancedExample.ino</a>
 , <a class="el" href="ledFlasher_8ino.html#afda0e57d1eef1a218a44397c29a88885">ledFlasher.ino</a>
 </li>
-<li>ntpRequested
-: <a class="el" href="ESPNtpClient_8h.html#aeb8b025505183f78dd68c428f897f549aa050fae20a2d1e5e306b761f0dc2a688">ESPNtpClient.h</a>
-</li>
 <li>ntpServer
-: <a class="el" href="advancedExample_8ino.html#a752895aa06a97c3166e73ef25b2135ef">advancedExample.ino</a>
-, <a class="el" href="ledFlasher_8ino.html#a752895aa06a97c3166e73ef25b2135ef">ledFlasher.ino</a>
+: <a class="el" href="ledFlasher_8ino.html#a752895aa06a97c3166e73ef25b2135ef">ledFlasher.ino</a>
+, <a class="el" href="advancedExample_8ino.html#a752895aa06a97c3166e73ef25b2135ef">advancedExample.ino</a>
+, <a class="el" href="main_8cpp.html#a752895aa06a97c3166e73ef25b2135ef">main.cpp</a>
 </li>
 <li>NTPStatus
 : <a class="el" href="ESPNtpClient_8h.html#aeb8b025505183f78dd68c428f897f549">ESPNtpClient.h</a>
@@ -208,15 +219,18 @@ $(function() {
 <h3><a id="index_o"></a>- o -</h3><ul>
 <li>offset
 : <a class="el" href="advancedExample_8ino.html#a129303e4bd38a8cdba722b6238ed56e9">advancedExample.ino</a>
+, <a class="el" href="main_8cpp.html#a129303e4bd38a8cdba722b6238ed56e9">main.cpp</a>
 </li>
 <li>ONBOARDLED
-: <a class="el" href="advancedExample_8ino.html#aa10709844c6be229a39a26039d1ff3cd">advancedExample.ino</a>
+: <a class="el" href="main_8cpp.html#aa10709844c6be229a39a26039d1ff3cd">main.cpp</a>
+, <a class="el" href="advancedExample_8ino.html#aa10709844c6be229a39a26039d1ff3cd">advancedExample.ino</a>
 </li>
 <li>onSyncEvent_t
 : <a class="el" href="ESPNtpClient_8h.html#a25d29b56b51da368f8330f94299b6c32">ESPNtpClient.h</a>
 </li>
 <li>onWifiEvent()
 : <a class="el" href="advancedExample_8ino.html#ad7801276fcdd6c02f1580b3bfee71c1d">advancedExample.ino</a>
+, <a class="el" href="main_8cpp.html#ad7801276fcdd6c02f1580b3bfee71c1d">main.cpp</a>
 </li>
 </ul>
 
@@ -229,8 +243,9 @@ $(function() {
 : <a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152ae005825f300d9a2b2d165e90a51a0e27">NTPEventTypes.h</a>
 </li>
 <li>processSyncEvent()
-: <a class="el" href="advancedExample_8ino.html#a782858657500ca468843899e9c758904">advancedExample.ino</a>
-, <a class="el" href="ledFlasher_8ino.html#a782858657500ca468843899e9c758904">ledFlasher.ino</a>
+: <a class="el" href="ledFlasher_8ino.html#a782858657500ca468843899e9c758904">ledFlasher.ino</a>
+, <a class="el" href="advancedExample_8ino.html#a782858657500ca468843899e9c758904">advancedExample.ino</a>
+, <a class="el" href="main_8cpp.html#a782858657500ca468843899e9c758904">main.cpp</a>
 </li>
 </ul>
 
@@ -271,13 +286,15 @@ $(function() {
 : <a class="el" href="advancedExample_8ino.html#a4fc01d736fe50cf5b977f755b675f11d">advancedExample.ino</a>
 , <a class="el" href="basicExample_8ino.html#a4fc01d736fe50cf5b977f755b675f11d">basicExample.ino</a>
 , <a class="el" href="ledFlasher_8ino.html#a4fc01d736fe50cf5b977f755b675f11d">ledFlasher.ino</a>
+, <a class="el" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d">main.cpp</a>
 </li>
 <li>seventyYears
 : <a class="el" href="ESPNtpClient_8cpp.html#acd0d9d8dd6599a87d900a8c728421832">ESPNtpClient.cpp</a>
 </li>
 <li>SHOW_TIME_PERIOD
-: <a class="el" href="advancedExample_8ino.html#ac6dbd64c4e02d393694fd33a46630cc9">advancedExample.ino</a>
-, <a class="el" href="basicExample_8ino.html#ac6dbd64c4e02d393694fd33a46630cc9">basicExample.ino</a>
+: <a class="el" href="basicExample_8ino.html#ac6dbd64c4e02d393694fd33a46630cc9">basicExample.ino</a>
+, <a class="el" href="main_8cpp.html#ac6dbd64c4e02d393694fd33a46630cc9">main.cpp</a>
+, <a class="el" href="advancedExample_8ino.html#ac6dbd64c4e02d393694fd33a46630cc9">advancedExample.ino</a>
 </li>
 <li>strBuffer
 : <a class="el" href="ESPNtpClient_8h.html#a664853cff9b57a85bd6953ecc4a628e4">ESPNtpClient.h</a>
@@ -289,8 +306,9 @@ $(function() {
 : <a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152a86e97631b6120a747c7b8a860d310100">NTPEventTypes.h</a>
 </li>
 <li>syncEventTriggered
-: <a class="el" href="advancedExample_8ino.html#a4723d571f64ea64708516f7fd6be1fa8">advancedExample.ino</a>
+: <a class="el" href="main_8cpp.html#a4723d571f64ea64708516f7fd6be1fa8">main.cpp</a>
 , <a class="el" href="ledFlasher_8ino.html#a4723d571f64ea64708516f7fd6be1fa8">ledFlasher.ino</a>
+, <a class="el" href="advancedExample_8ino.html#a4723d571f64ea64708516f7fd6be1fa8">advancedExample.ino</a>
 </li>
 <li>syncNotNeeded
 : <a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152a8bba5d5f0a5f7f7ff540585939493879">NTPEventTypes.h</a>
@@ -301,6 +319,7 @@ $(function() {
 <h3><a id="index_t"></a>- t -</h3><ul>
 <li>timedelay
 : <a class="el" href="advancedExample_8ino.html#a8f6e70cd05cccf0eef68d0917400a9b2">advancedExample.ino</a>
+, <a class="el" href="main_8cpp.html#a8f6e70cd05cccf0eef68d0917400a9b2">main.cpp</a>
 </li>
 <li>timeSyncd
 : <a class="el" href="NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152a405f059fceb5c3f5f9bf762b28313dff">NTPEventTypes.h</a>
@@ -321,6 +340,7 @@ $(function() {
 <h3><a id="index_w"></a>- w -</h3><ul>
 <li>wifiFirstConnected
 : <a class="el" href="advancedExample_8ino.html#a974fed7be44940f53b40896edfbbb7df">advancedExample.ino</a>
+, <a class="el" href="main_8cpp.html#a974fed7be44940f53b40896edfbbb7df">main.cpp</a>
 </li>
 </ul>
 
@@ -329,12 +349,14 @@ $(function() {
 <li>YOUR_WIFI_PASSWD
 : <a class="el" href="advancedExample_8ino.html#adbaa995992b5a4df044944247441910d">advancedExample.ino</a>
 , <a class="el" href="basicExample_8ino.html#adbaa995992b5a4df044944247441910d">basicExample.ino</a>
+, <a class="el" href="main_8cpp.html#adbaa995992b5a4df044944247441910d">main.cpp</a>
 , <a class="el" href="ledFlasher_8ino.html#adbaa995992b5a4df044944247441910d">ledFlasher.ino</a>
 </li>
 <li>YOUR_WIFI_SSID
 : <a class="el" href="advancedExample_8ino.html#a5e1b0f9e128a1295d8416e75517534de">advancedExample.ino</a>
-, <a class="el" href="basicExample_8ino.html#a5e1b0f9e128a1295d8416e75517534de">basicExample.ino</a>
 , <a class="el" href="ledFlasher_8ino.html#a5e1b0f9e128a1295d8416e75517534de">ledFlasher.ino</a>
+, <a class="el" href="main_8cpp.html#a5e1b0f9e128a1295d8416e75517534de">main.cpp</a>
+, <a class="el" href="basicExample_8ino.html#a5e1b0f9e128a1295d8416e75517534de">basicExample.ino</a>
 </li>
 </ul>
 </div><!-- contents -->

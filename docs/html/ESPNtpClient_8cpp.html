@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="ESPNTPClient-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">ESPNtpClient
-   &#160;<span id="projectnumber">0.1.0</span>
+   &#160;<span id="projectnumber">0.2.2</span>
    </div>
    <div id="projectbrief">Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32</div>
   </td>
@@ -83,8 +83,11 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtimestamp__t.html">timestamp_t</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">NTP Timestamp Format The prime epoch, or base date of era 0, is 0 h 1 January 1900 UTC, when all bits are zero.  <a href="structtimestamp__t.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtimestamp64__t.html">timestamp64_t</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">NTP Timestamp Format The prime epoch, or base date of era 0, is 0 h 1 January 1900 UTC, when all bits are zero.  <a href="structtimestamp64__t.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtimestamp32__t.html">timestamp32_t</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Short NTP Timestamp Format.  <a href="structtimestamp32__t.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
@@ -100,6 +103,8 @@ Functions</h2></td></tr>
 <tr class="separator:a942ca748a0c3a7b8b4478ffc6074e0e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a004437ce9f8976c43a4453a91718a424"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ESPNtpClient_8cpp.html#a004437ce9f8976c43a4453a91718a424">flipInt32</a> (int32_t number)</td></tr>
 <tr class="separator:a004437ce9f8976c43a4453a91718a424"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13517d74eb9c1f4403c13782bf4c329f"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ESPNtpClient_8cpp.html#a13517d74eb9c1f4403c13782bf4c329f">flipInt16</a> (int16_t number)</td></tr>
+<tr class="separator:a13517d74eb9c1f4403c13782bf4c329f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac65202d117e0901acbdac706d78a6ef9"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ESPNtpClient_8cpp.html#ac65202d117e0901acbdac706d78a6ef9">dumpNTPPacket</a> (byte *data, size_t length, char *buffer, int len)</td></tr>
 <tr class="separator:ac65202d117e0901acbdac706d78a6ef9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -209,7 +214,27 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00079">79</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00104">104</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a13517d74eb9c1f4403c13782bf4c329f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13517d74eb9c1f4403c13782bf4c329f">&#9670;&nbsp;</a></span>flipInt16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int16_t flipInt16 </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>number</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00090">90</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
 
 </div>
 </div>
@@ -229,7 +254,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00065">65</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00076">76</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
 
 </div>
 </div>
@@ -248,7 +273,7 @@ Variables</h2></td></tr>
 
 <p>Singleton <a class="el" href="classNTPClient.html" title="NTPClient class.">NTPClient</a> instance. </p>
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00061">61</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00072">72</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
 
 </div>
 </div>
@@ -264,7 +289,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00059">59</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00070">70</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
 
 </div>
 </div>
@@ -280,7 +305,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00063">63</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8cpp_source.html#l00074">74</a> of file <a class="el" href="ESPNtpClient_8cpp_source.html">ESPNtpClient.cpp</a>.</p>
 
 </div>
 </div>

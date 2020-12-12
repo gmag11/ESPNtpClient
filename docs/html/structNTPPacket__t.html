@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="ESPNTPClient-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">ESPNtpClient
-   &#160;<span id="projectnumber">0.1.0</span>
+   &#160;<span id="projectnumber">0.2.2</span>
    </div>
    <div id="projectbrief">Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32</div>
   </td>
@@ -88,18 +88,18 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ae0b675efa2e93e1edd4e5d07aa058e7c"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#ae0b675efa2e93e1edd4e5d07aa058e7c">peerStratum</a></td></tr>
 <tr class="memdesc:ae0b675efa2e93e1edd4e5d07aa058e7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">8-bit integer representing the stratum  <a href="structNTPPacket__t.html#ae0b675efa2e93e1edd4e5d07aa058e7c">More...</a><br /></td></tr>
 <tr class="separator:ae0b675efa2e93e1edd4e5d07aa058e7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7342fac1a3be39fac2a1b76c062d2618"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#a7342fac1a3be39fac2a1b76c062d2618">pollingInterval</a></td></tr>
-<tr class="memdesc:a7342fac1a3be39fac2a1b76c062d2618"><td class="mdescLeft">&#160;</td><td class="mdescRight">8-bit signed integer representing the maximum interval between successive messages, in log2 seconds  <a href="structNTPPacket__t.html#a7342fac1a3be39fac2a1b76c062d2618">More...</a><br /></td></tr>
-<tr class="separator:a7342fac1a3be39fac2a1b76c062d2618"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af02e6a91922b0b8b28010e50364347d9"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#af02e6a91922b0b8b28010e50364347d9">clockPrecission</a></td></tr>
-<tr class="memdesc:af02e6a91922b0b8b28010e50364347d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">8-bit signed integer representing the precision of the system clock, in log2 seconds  <a href="structNTPPacket__t.html#af02e6a91922b0b8b28010e50364347d9">More...</a><br /></td></tr>
-<tr class="separator:af02e6a91922b0b8b28010e50364347d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a180be2214c162ac6a8ae7111ea86250f"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#a180be2214c162ac6a8ae7111ea86250f">rootDelay</a></td></tr>
-<tr class="memdesc:a180be2214c162ac6a8ae7111ea86250f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total round-trip delay to the reference clock, in NTP short format.  <a href="structNTPPacket__t.html#a180be2214c162ac6a8ae7111ea86250f">More...</a><br /></td></tr>
-<tr class="separator:a180be2214c162ac6a8ae7111ea86250f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acbc4cd56542f2d2873bd9e3b79be70d4"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#acbc4cd56542f2d2873bd9e3b79be70d4">dispersion</a></td></tr>
-<tr class="memdesc:acbc4cd56542f2d2873bd9e3b79be70d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total dispersion to the reference clock, in NTP short format.  <a href="structNTPPacket__t.html#acbc4cd56542f2d2873bd9e3b79be70d4">More...</a><br /></td></tr>
-<tr class="separator:acbc4cd56542f2d2873bd9e3b79be70d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa317717772f4e38ba56b925177ab5b6e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#aa317717772f4e38ba56b925177ab5b6e">pollingInterval</a></td></tr>
+<tr class="memdesc:aa317717772f4e38ba56b925177ab5b6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum interval between successive messages, in seconds.  <a href="structNTPPacket__t.html#aa317717772f4e38ba56b925177ab5b6e">More...</a><br /></td></tr>
+<tr class="separator:aa317717772f4e38ba56b925177ab5b6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a203d167320b5f457eaad4c5c2287a601"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#a203d167320b5f457eaad4c5c2287a601">clockPrecission</a></td></tr>
+<tr class="memdesc:a203d167320b5f457eaad4c5c2287a601"><td class="mdescLeft">&#160;</td><td class="mdescRight">8-bit signed integer representing the precision of the system clock, in log2 seconds  <a href="structNTPPacket__t.html#a203d167320b5f457eaad4c5c2287a601">More...</a><br /></td></tr>
+<tr class="separator:a203d167320b5f457eaad4c5c2287a601"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2b05e6f4184dbb9ae8b246192ffc398"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#ac2b05e6f4184dbb9ae8b246192ffc398">rootDelay</a></td></tr>
+<tr class="memdesc:ac2b05e6f4184dbb9ae8b246192ffc398"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total round-trip delay to the reference clock.  <a href="structNTPPacket__t.html#ac2b05e6f4184dbb9ae8b246192ffc398">More...</a><br /></td></tr>
+<tr class="separator:ac2b05e6f4184dbb9ae8b246192ffc398"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae71f63d80b87c39794bc0b5c840f34f0"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#ae71f63d80b87c39794bc0b5c840f34f0">dispersion</a></td></tr>
+<tr class="memdesc:ae71f63d80b87c39794bc0b5c840f34f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total dispersion to the reference clock.  <a href="structNTPPacket__t.html#ae71f63d80b87c39794bc0b5c840f34f0">More...</a><br /></td></tr>
+<tr class="separator:ae71f63d80b87c39794bc0b5c840f34f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af309052ae572f15f7c2cc00c61ceefdc"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNTPPacket__t.html#af309052ae572f15f7c2cc00c61ceefdc">refID</a> [4]</td></tr>
 <tr class="memdesc:af309052ae572f15f7c2cc00c61ceefdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">32-bit code identifying the particular server or reference clock  <a href="structNTPPacket__t.html#af309052ae572f15f7c2cc00c61ceefdc">More...</a><br /></td></tr>
 <tr class="separator:af309052ae572f15f7c2cc00c61ceefdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,16 +122,16 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>NTP packet structure. </p>
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00130">130</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00129">129</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="af02e6a91922b0b8b28010e50364347d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af02e6a91922b0b8b28010e50364347d9">&#9670;&nbsp;</a></span>clockPrecission</h2>
+<a id="a203d167320b5f457eaad4c5c2287a601"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a203d167320b5f457eaad4c5c2287a601">&#9670;&nbsp;</a></span>clockPrecission</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t NTPPacket_t::clockPrecission</td>
+          <td class="memname">float NTPPacket_t::clockPrecission</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -139,7 +139,7 @@ Public Attributes</h2></td></tr>
 <p>8-bit signed integer representing the precision of the system clock, in log2 seconds </p>
 <p>For instance, a value of -18 corresponds to a precision of about one microsecond. The precision can be determined when the service first starts up as the minimum time of several iterations to read the system clock </p>
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00163">163</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00162">162</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
 
 </div>
 </div>
@@ -161,19 +161,19 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="acbc4cd56542f2d2873bd9e3b79be70d4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acbc4cd56542f2d2873bd9e3b79be70d4">&#9670;&nbsp;</a></span>dispersion</h2>
+<a id="ae71f63d80b87c39794bc0b5c840f34f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae71f63d80b87c39794bc0b5c840f34f0">&#9670;&nbsp;</a></span>dispersion</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t NTPPacket_t::dispersion</td>
+          <td class="memname">float NTPPacket_t::dispersion</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Total dispersion to the reference clock, in NTP short format. </p>
+<p>Total dispersion to the reference clock. </p>
 
 <p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00166">166</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
 
@@ -193,7 +193,7 @@ Public Attributes</h2></td></tr>
 
 <p>NTP packet flags as <a class="el" href="structNTPFlags__t.html" title="Flags in NTP packet.">NTPFlags_t</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00132">132</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00131">131</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
 
 </div>
 </div>
@@ -243,26 +243,26 @@ Public Attributes</h2></td></tr>
 <td class="markdownTableBodyCenter">17-255  </td><td class="markdownTableBodyNone">reserved   </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00145">145</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00144">144</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
 
 </div>
 </div>
-<a id="a7342fac1a3be39fac2a1b76c062d2618"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7342fac1a3be39fac2a1b76c062d2618">&#9670;&nbsp;</a></span>pollingInterval</h2>
+<a id="aa317717772f4e38ba56b925177ab5b6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa317717772f4e38ba56b925177ab5b6e">&#9670;&nbsp;</a></span>pollingInterval</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t NTPPacket_t::pollingInterval</td>
+          <td class="memname">uint32_t NTPPacket_t::pollingInterval</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>8-bit signed integer representing the maximum interval between successive messages, in log2 seconds </p>
-<p>Suggested default limits for minimum and maximum poll intervals are 6 and 10, respectively </p>
+<p>Maximum interval between successive messages, in seconds. </p>
+<p>Calculated from 8-bit signed integer representing log2 value. Suggested default limits for minimum and maximum poll intervals are 6 and 10, what represent 64 to 1024 seconds, respectively </p>
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00153">153</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00152">152</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
 
 </div>
 </div>
@@ -365,21 +365,21 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a180be2214c162ac6a8ae7111ea86250f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a180be2214c162ac6a8ae7111ea86250f">&#9670;&nbsp;</a></span>rootDelay</h2>
+<a id="ac2b05e6f4184dbb9ae8b246192ffc398"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2b05e6f4184dbb9ae8b246192ffc398">&#9670;&nbsp;</a></span>rootDelay</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t NTPPacket_t::rootDelay</td>
+          <td class="memname">float NTPPacket_t::rootDelay</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Total round-trip delay to the reference clock, in NTP short format. </p>
+<p>Total round-trip delay to the reference clock. </p>
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00165">165</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00164">164</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
 
 </div>
 </div>
@@ -415,7 +415,7 @@ Public Attributes</h2></td></tr>
 
 <p>true if following data is valid </p>
 
-<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00131">131</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ESPNtpClient_8h_source.html#l00130">130</a> of file <a class="el" href="ESPNtpClient_8h_source.html">ESPNtpClient.h</a>.</p>
 
 </div>
 </div>

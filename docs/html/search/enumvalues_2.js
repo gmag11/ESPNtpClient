@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['noresponse_325',['noResponse',['../NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152ad322fce90458bd3112a92bca2439287e',1,'NTPEventTypes.h']]],
-  ['ntprequested_326',['ntpRequested',['../ESPNtpClient_8h.html#aeb8b025505183f78dd68c428f897f549aa050fae20a2d1e5e306b761f0dc2a688',1,'ESPNtpClient.h']]]
+  ['invalidaddress_343',['invalidAddress',['../NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152a6d9b6183ea430f1e3a851ac72fe5cbb0',1,'NTPEventTypes.h']]],
+  ['invalidport_344',['invalidPort',['../NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152ae9873bca412f27726f2385a0f15f257b',1,'NTPEventTypes.h']]]
 ];

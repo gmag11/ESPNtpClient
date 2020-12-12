@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="ESPNTPClient-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">ESPNtpClient
-   &#160;<span id="projectnumber">0.1.0</span>
+   &#160;<span id="projectnumber">0.2.2</span>
    </div>
    <div id="projectbrief">Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32</div>
   </td>
@@ -75,7 +75,7 @@ $(function() {
 
 <h3><a id="index_c"></a>- c -</h3><ul>
 <li>clockPrecission
-: <a class="el" href="structNTPPacket__t.html#af02e6a91922b0b8b28010e50364347d9">NTPPacket_t</a>
+: <a class="el" href="structNTPPacket__t.html#a203d167320b5f457eaad4c5c2287a601">NTPPacket_t</a>
 </li>
 </ul>
 
@@ -89,7 +89,8 @@ $(function() {
 : <a class="el" href="structNTPPacket__t.html#ae692986f357410796ec037e81e8ebd45">NTPPacket_t</a>
 </li>
 <li>dispersion
-: <a class="el" href="structNTPPacket__t.html#acbc4cd56542f2d2873bd9e3b79be70d4">NTPPacket_t</a>
+: <a class="el" href="structNTPPacket__t.html#ae71f63d80b87c39794bc0b5c840f34f0">NTPPacket_t</a>
+, <a class="el" href="structNTPSyncEventInfo__t.html#a141a6ef93e3de51f417c2d265403a155">NTPSyncEventInfo_t</a>
 </li>
 </ul>
 
@@ -109,7 +110,8 @@ $(function() {
 : <a class="el" href="structNTPPacket__t.html#a1991b37c1986f94db186e05bae1c39db">NTPPacket_t</a>
 </li>
 <li>fraction
-: <a class="el" href="structtimestamp__t.html#a4fcd02a476b16e9e3df208ce98fb1339">timestamp_t</a>
+: <a class="el" href="structtimestamp32__t.html#a9d0e20f8db5fa8d60fc05b5db14dfeb6">timestamp32_t</a>
+, <a class="el" href="structtimestamp64__t.html#a917cded3b868aae8b35a8a28e71effcd">timestamp64_t</a>
 </li>
 </ul>
 
@@ -137,10 +139,16 @@ $(function() {
 <li>longInterval
 : <a class="el" href="classNTPClient.html#a4ec812a51fa11876ada81ba7ab24b123">NTPClient</a>
 </li>
+<li>loopTimer
+: <a class="el" href="classNTPClient.html#a317c58e4e14c6c79db2f750f97b6928b">NTPClient</a>
+</li>
 </ul>
 
 
 <h3><a id="index_m"></a>- m -</h3><ul>
+<li>maxDispersionErrors
+: <a class="el" href="classNTPClient.html#a7416006fb24cce0f8c96b94fa214af12">NTPClient</a>
+</li>
 <li>maxNumSyncRetry
 : <a class="el" href="classNTPClient.html#a47b7d0661fc4c7c036f77e0f8c245bdc">NTPClient</a>
 </li>
@@ -154,6 +162,9 @@ $(function() {
 
 
 <h3><a id="index_n"></a>- n -</h3><ul>
+<li>ntpRequested
+: <a class="el" href="classNTPClient.html#aa3f352b106fd1c948f850dd141352e5a">NTPClient</a>
+</li>
 <li>ntpServerIPAddress
 : <a class="el" href="classNTPClient.html#ab166bde13addb2bbe840ef41832dc321">NTPClient</a>
 </li>
@@ -165,6 +176,9 @@ $(function() {
 </li>
 <li>numAveRounds
 : <a class="el" href="classNTPClient.html#af235a651b350cb3fc4681dff3fa74e2d">NTPClient</a>
+</li>
+<li>numDispersionErrors
+: <a class="el" href="classNTPClient.html#a589a97ac9363744f1d17cee6f7cf572c">NTPClient</a>
 </li>
 <li>numSyncRetry
 : <a class="el" href="classNTPClient.html#a6511dc00fe7783f8fdbb655c199908aa">NTPClient</a>
@@ -200,7 +214,7 @@ $(function() {
 : <a class="el" href="structNTPPacket__t.html#ae0b675efa2e93e1edd4e5d07aa058e7c">NTPPacket_t</a>
 </li>
 <li>pollingInterval
-: <a class="el" href="structNTPPacket__t.html#a7342fac1a3be39fac2a1b76c062d2618">NTPPacket_t</a>
+: <a class="el" href="structNTPPacket__t.html#aa317717772f4e38ba56b925177ab5b6e">NTPPacket_t</a>
 </li>
 <li>port
 : <a class="el" href="structNTPSyncEventInfo__t.html#a099242535cf89e6d1b7af04654f2d05c">NTPSyncEventInfo_t</a>
@@ -211,6 +225,9 @@ $(function() {
 <h3><a id="index_r"></a>- r -</h3><ul>
 <li>receive
 : <a class="el" href="structNTPPacket__t.html#a1d7673bb56c21641c0d318fc5283e263">NTPPacket_t</a>
+</li>
+<li>receiverTimer
+: <a class="el" href="classNTPClient.html#a4bad124820a37328802e1b5c7ff49257">NTPClient</a>
 </li>
 <li>reference
 : <a class="el" href="structNTPPacket__t.html#aaf545dc284bbb7f905871882e7240a76">NTPPacket_t</a>
@@ -228,7 +245,7 @@ $(function() {
 : <a class="el" href="structNTPSyncEventInfo__t.html#a39831bffb7c7d8760ba0861c531ecbc8">NTPSyncEventInfo_t</a>
 </li>
 <li>rootDelay
-: <a class="el" href="structNTPPacket__t.html#a180be2214c162ac6a8ae7111ea86250f">NTPPacket_t</a>
+: <a class="el" href="structNTPPacket__t.html#ac2b05e6f4184dbb9ae8b246192ffc398">NTPPacket_t</a>
 </li>
 <li>round
 : <a class="el" href="classNTPClient.html#a2eb6c34c7f5fb18d160654d1c3baa09c">NTPClient</a>
@@ -238,7 +255,8 @@ $(function() {
 
 <h3><a id="index_s"></a>- s -</h3><ul>
 <li>secondsOffset
-: <a class="el" href="structtimestamp__t.html#a92fdde7e252d2f58b7408795e1ac68bd">timestamp_t</a>
+: <a class="el" href="structtimestamp32__t.html#a0911aacf609221818b3c933fa4e4012e">timestamp32_t</a>
+, <a class="el" href="structtimestamp64__t.html#a121d17a5e997df31f7f9524aa735ed5b">timestamp64_t</a>
 </li>
 <li>serverAddress
 : <a class="el" href="structNTPSyncEventInfo__t.html#aba3db292c2c80ebe70df204f53884070">NTPSyncEventInfo_t</a>

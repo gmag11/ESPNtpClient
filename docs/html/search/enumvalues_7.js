@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['unsyncd_335',['unsyncd',['../ESPNtpClient_8h.html#aeb8b025505183f78dd68c428f897f549a45299e6794c26d28ebf9dec9e7221de2',1,'ESPNtpClient.h']]]
+  ['timesyncd_353',['timeSyncd',['../NTPEventTypes_8h.html#ab04a3f38407e6839ce1edc75ae02f152a405f059fceb5c3f5f9bf762b28313dff',1,'NTPEventTypes.h']]]
 ];

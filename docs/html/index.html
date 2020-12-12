@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.20"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ESPNtpClient: ESPNtpClient</title>
+<title>ESPNtpClient: Main Page</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -23,7 +23,7 @@
   <td id="projectlogo"><img alt="Logo" src="ESPNTPClient-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">ESPNtpClient
-   &#160;<span id="projectnumber">0.1.0</span>
+   &#160;<span id="projectnumber">0.2.2</span>
    </div>
    <div id="projectbrief">Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32</div>
   </td>
@@ -65,10 +65,12 @@ $(function() {
 
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">ESPNtpClient </div>  </div>
+<div class="title">ESPNtpClient Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_readme"></a> There are many NTP client libraries around. All them have different implementations for time tracking. Indeed I developed one of them. It is called <a href="https://github.com/gmag11/NtpClient">NTPClientLib</a> and was intended to be as easy to use as possible while offering a wide range of features, including multiplatform support (ESP8266, ESP32, Arduino MKR1000, Arduino UNO with Ethernet shield). Since that I moved all my projects to ESP8266 and ESP32.</p>
+<div class="textblock"><p><a class="anchor" id="md_readme"></a><a href="https://github.com/gmag11/ESPNtpClient/actions/"><img src="https://github.com/gmag11/ESPNtpClient/workflows/PlatformIO/badge.svg" alt="PlatformIO" style="pointer-events: none;" class="inline"/></a></p>
+<h1>ESPNtpClient</h1>
+<p>There are many NTP client libraries around. All them have different implementations for time tracking. Indeed I developed one of them. It is called <a href="https://github.com/gmag11/NtpClient">NTPClientLib</a> and was intended to be as easy to use as possible while offering a wide range of features, including multiplatform support (ESP8266, ESP32, Arduino MKR1000, Arduino UNO with Ethernet shield). Since that I moved all my projects to ESP8266 and ESP32.</p>
 <p>Some time ago ESP32 and ESP8266 SDKs include NTP and time tracking internal functions, including Posix compliant Time.h implementation, what gives less sense to use external libraries.</p>
 <p>But all those libraries including Espressif SDK synchronize clock with plus minus 1 second accuracy, what is enough for most projects. But some others that require tight synchronization require additional sources of time reference, although NTP protocol is suitable to have 1 millisecond accuracy on these little boards.</p>
 <p>This limitation comes from the way they calculate time offset. All them (at least the ones that I know) only use one of three timestamps that can be extracted from NTP packet, so they do not have round trip delay into account.</p>
@@ -76,7 +78,7 @@ $(function() {
 <p>Many of the methods used in my old NTPClientLib library are the same in this one. I've added some methods to get <code>timeval</code> times, that include microseconds information.</p>
 <p>ESPNtpClient do not have any external dependency.</p>
 <p>(Attribution) Clock logo taken from <a href="https://www.visualpharm.com/free-icons/clock-595b40b75ba036ed117d92ff">https://www.visualpharm.com/free-icons/clock-595b40b75ba036ed117d92ff</a></p>
-<h1>Description</h1>
+<h2>Description</h2>
 <p>This is a NTP library to be able to get time from NTP server with my connected microcontrollers.</p>
 <p>Using the library is fairly easy. A NTP singleton object is created inside library. You may use default values by using <code>NTP.begin()</code> without any parameter. After that, synchronization is done regularly without user intervention. Some parameters can be adjusted: server, sync frequency, time zone.</p>
 <p>You don't need anything more. Time update is managed inside library so, after <code>NTP.begin()</code> no more calls to library are needed.</p>
