@@ -246,13 +246,16 @@ protected:
     NTPStatus_t status = unsyncd;   ///< @brief Sync status
     char ntpServerName[SERVER_NAME_LENGTH];                         ///< @brief  of NTP server on Internet or LAN
     IPAddress ntpServerIPAddress;   ///< @brief  IP address of NTP server on Internet or LAN
+public:
 #ifdef ESP32
+    bool terminateTasks = false;
     TaskHandle_t loopHandle = NULL;                                 ///< @brief TimeSync loop task handle
     TaskHandle_t receiverHandle = NULL;                             ///< @brief NTP response receiver task handle
 #else
     Ticker loopTimer;               ///< @brief Timer to trigger timesync
     Ticker receiverTimer;           ///< @brief Timer to check received responses
 #endif
+protected:
     Ticker responseTimer;           ///< @brief Timer to trigger response timeout
     bool isConnected = false;       ///< @brief True if client has resolved correctly server IP address
     double offset;                  ///< @brief Temporary offset storage for event notify
@@ -363,20 +366,21 @@ public:
       * @brief Cleans data and stops all tasks
       */
     void stop (){
-        if (udp){
-            udp_remove (udp);
-        }
-        if (lastNtpResponsePacket){
-            pbuf_free (lastNtpResponsePacket);
-        }
 #ifdef ESP32
-        vTaskDelete (loopHandle);
-        vTaskDelete (receiverHandle);
+        terminateTasks = true;
 #else
         loopTimer.detach ();
         receiverTimer.detach ();
 #endif // ESP8266
         responseTimer.detach ();
+#ifdef ESP8266
+        if (udp) {
+            udp_remove (udp);
+        }
+        // if (lastNtpResponsePacket) {
+        //     pbuf_free (lastNtpResponsePacket);
+        // }
+#endif // ESP8266
     }
     
     /**

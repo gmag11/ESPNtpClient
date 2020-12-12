@@ -178,7 +178,7 @@ bool NTPClient::begin (const char* ntpServerName) {
         3072, /* Stack size of task */
         this, /* parameter of the task */
         1, /* priority of the task */
-        NULL, /* Task handle to keep track of created task */
+        &receiverHandle, /* Task handle to keep track of created task */
         CONFIG_ARDUINO_RUNNING_CORE);
 #else
     loopTimer.attach_ms (ESP8266_LOOP_TASK_INTERVAL, &NTPClient::s_getTimeloop, (void*)this);
@@ -393,7 +393,7 @@ void NTPClient::s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
 void NTPClient::s_receiverTask (void* arg){
     NTPClient* self = reinterpret_cast<NTPClient*>(arg);
 #ifdef ESP32
-    for (;;) {
+    while (!self->terminateTasks) {
 #endif
         if (self->responsePacketValid) {
             self->processPacket (self->lastNtpResponsePacket);
@@ -404,6 +404,8 @@ void NTPClient::s_receiverTask (void* arg){
         const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
         vTaskDelay (xDelay);
     }
+    DEBUGLOG ("About to terminate receiver task. Handle %p", self->receiverHandle);
+    vTaskDelete (self->receiverHandle);
 #endif
 }
 
@@ -429,13 +431,12 @@ char* NTPClient::getUptimeString () {
 }
 
 void NTPClient::s_getTimeloop (void* arg) {
+    NTPClient* self = reinterpret_cast<NTPClient*>(arg);
 #ifdef ESP32
-    for (;;) {
+    while (!self->terminateTasks) {
 #endif // ESP32
         //DEBUGLOG ("Running periodic task");
-        NTPClient* self = reinterpret_cast<NTPClient*>(arg);
         static time_t lastGotTime;
-
         if (self->isConnected) {
             if (WiFi.isConnected ()) {
                 if (::millis () - lastGotTime >= self->actualInterval) {
@@ -480,6 +481,13 @@ void NTPClient::s_getTimeloop (void* arg) {
         const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
         vTaskDelay (xDelay);
     }
+    DEBUGLOG ("About to terminate loop task. Handle %p", self->loopHandle);
+    if (self->udp) {
+        DEBUGLOG ("Deleted UDP connection");
+        udp_remove (self->udp);
+    }
+    vTaskDelete (self->loopHandle);
+    DEBUGLOG ("loop task terminated. Handle %p", self->loopHandle);
 #endif // ESP32
 }
 
