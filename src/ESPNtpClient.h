@@ -1,7 +1,7 @@
 /**
   * @file ESPNtpClient.h
-  * @version 0.2.0
-  * @date 01/12/2020
+  * @version 0.2.2
+  * @date 13/12/2020
   * @author German Martin
   * @brief Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32
   */
@@ -304,7 +304,7 @@ protected:
     
     /**
       * @brief Write NTP packet data to Serial monitor
-      * @param ntpPacket Packet to analyze
+      * @param decPacket Packet to analyze
       */
     void dumpNtpPacketInfo (NTPPacket_t* decPacket);
     
