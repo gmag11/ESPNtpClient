@@ -38,6 +38,15 @@
             "platformio.ini",
             "ledFlasher.ino"
         ]
-    }]
+    }],
+    "export": {
+        "exclude": [
+            "docs/*",
+            "include/*",
+            "lib/*",
+            "test/*"
+        ]
+    },
+    "license": "GPL-3.0-or-later"
 }
 
