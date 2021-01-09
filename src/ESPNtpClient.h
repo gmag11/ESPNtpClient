@@ -595,13 +595,23 @@ public:
     }
     
     /**
+    * @brief Converts current time and date to a char string
+    * @return Char string built from current time
+    */
+    char* getTimeDateStringForJS () {
+        timeval currentTime;
+        gettimeofday (&currentTime, NULL);
+        return getTimeDateString (currentTime, "%02m/%02d/%04Y %02H:%02M:%02S");
+    }
+    
+    /**
     * @brief Converts given time and date to a char string
     * @param moment `timeval` object to convert to String
     * @return Char string built from current time
     */
-    char* getTimeDateString (timeval moment) {
+    char* getTimeDateString (timeval moment, char* format = "%02d/%02m/%04Y %02H:%02M:%02S") {
         tm* local_tm = localtime (&moment.tv_sec);
-        size_t index = strftime (strBuffer, sizeof (strBuffer), "%02d/%02m/%04Y %02H:%02M:%02S", local_tm);
+        size_t index = strftime (strBuffer, sizeof (strBuffer), format, local_tm);
         index += snprintf (strBuffer + index, sizeof (strBuffer) - index, ".%06ld", moment.tv_usec);
         strftime (strBuffer + index, sizeof (strBuffer) - index, " %Z", local_tm);
         return strBuffer;
@@ -612,9 +622,9 @@ public:
     * @param moment `time_t` value (UNIX time) to convert to char string
     * @return Char string built from current time
     */
-    char* getTimeDateString (time_t moment) {
+    char* getTimeDateString (time_t moment, char* format = "%02d/%02m/%04Y %02H:%02M:%02S") {
         tm* local_tm = localtime (&moment);
-        strftime (strBuffer, sizeof (strBuffer), "%02d/%02m/%04Y %02H:%02M:%02S", local_tm);
+        strftime (strBuffer, sizeof (strBuffer), format, local_tm);
 
         return strBuffer;
     }
