@@ -599,8 +599,7 @@ public:
     * @return Char string built from current time
     */
     char* getTimeDateStringForJS () {
-        timeval currentTime;
-        gettimeofday (&currentTime, NULL);
+     		 time_t currentTime = time (NULL);
         return getTimeDateString (currentTime, "%02m/%02d/%04Y %02H:%02M:%02S");
     }
     
