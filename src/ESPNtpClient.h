@@ -542,7 +542,6 @@ public:
     char* getTimeStr (time_t moment) {
         tm* local_tm = localtime (&moment);
         strftime (strBuffer, sizeof(strBuffer), "%H:%M:%S", local_tm);
-
         return strBuffer;
     }
 
@@ -599,9 +598,7 @@ public:
     * @return Char string built from current time
     */
     char* getTimeDateStringForJS () {
-        timeval currentTime;
-        gettimeofday (&currentTime, NULL);
-        return getTimeDateString (currentTime, "%02m/%02d/%04Y %02H:%02M:%02S");
+        return getTimeDateString (time (NULL), "%02m/%02d/%04Y %02H:%02M:%02S");
     }
     
     /**
