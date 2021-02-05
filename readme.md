@@ -16,6 +16,12 @@ Many of the methods used in my old NTPClientLib library are the same in this one
 
 ESPNtpClient do not have any external dependency.
 
+----------------
+
+**Important**: This library task is only related to time synchronization and, as NTP protocol does, works using UTC time internally. All time management including local time conversion, time zones, daylight savings, etc. is done by Espressif sdk time subsystem that is based on GNU time C library. https://kirste.userpage.fu-berlin.de/chemnet/use/info/libc/libc_17.html
+
+----------
+
 (Attribution) Clock logo taken from https://www.visualpharm.com/free-icons/clock-595b40b75ba036ed117d92ff
 
 ## Description
