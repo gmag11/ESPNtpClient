@@ -1,7 +1,7 @@
 /**
   * @file ESPNtpClient.h
-  * @version 0.2.2
-  * @date 13/12/2020
+  * @version 0.2.3
+  * @date 14/02/2021
   * @author German Martin
   * @brief Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32
   */
@@ -604,6 +604,7 @@ public:
     /**
     * @brief Converts given time and date to a char string
     * @param moment `timeval` object to convert to String
+    * @param format Format as printf
     * @return Char string built from current time
     */
     char* getTimeDateString (timeval moment, const char* format = "%02d/%02m/%04Y %02H:%02M:%02S") {
@@ -617,6 +618,7 @@ public:
     /**
     * @brief Converts given time and date to a char string
     * @param moment `time_t` value (UNIX time) to convert to char string
+    * @param format Format as printf
     * @return Char string built from current time
     */
     char* getTimeDateString (time_t moment, const char* format = "%02d/%02m/%04Y %02H:%02M:%02S") {
