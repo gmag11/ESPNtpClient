@@ -606,7 +606,7 @@ public:
     * @param moment `timeval` object to convert to String
     * @return Char string built from current time
     */
-    char* getTimeDateString (timeval moment, char* format = "%02d/%02m/%04Y %02H:%02M:%02S") {
+    char* getTimeDateString (timeval moment, const char* format = "%02d/%02m/%04Y %02H:%02M:%02S") {
         tm* local_tm = localtime (&moment.tv_sec);
         size_t index = strftime (strBuffer, sizeof (strBuffer), format, local_tm);
         index += snprintf (strBuffer + index, sizeof (strBuffer) - index, ".%06ld", moment.tv_usec);
@@ -619,7 +619,7 @@ public:
     * @param moment `time_t` value (UNIX time) to convert to char string
     * @return Char string built from current time
     */
-    char* getTimeDateString (time_t moment, char* format = "%02d/%02m/%04Y %02H:%02M:%02S") {
+    char* getTimeDateString (time_t moment, const char* format = "%02d/%02m/%04Y %02H:%02M:%02S") {
         tm* local_tm = localtime (&moment);
         strftime (strBuffer, sizeof (strBuffer), format, local_tm);
 
