@@ -3,13 +3,13 @@
 
 #define DBG_PORT Serial
 
-//#define DEBUG_NTPCLIENT 4
+//#define DEBUG_NTPCLIENT 3
 #ifdef DEBUG_NTPCLIENT
 
 #ifdef ESP8266
 const char* extractFileName (const char* path);
-#define DEBUG_LINE_PREFIX() DBG_PORT.printf_P (PSTR("[%lu][%s:%d] %s() Heap: %lu | "),::millis(),extractFileName(__FILE__),__LINE__,__FUNCTION__,(unsigned long)ESP.getFreeHeap())
-#define DEBUGLOG(text,...) DEBUG_LINE_PREFIX();DBG_PORT.printf_P(PSTR(text),##__VA_ARGS__);DBG_PORT.println()
+#define DEBUG_LINE_PREFIX(tag) DBG_PORT.printf_P (PSTR(tag "[%lu][%s:%d] %s() Heap: %lu | "),::millis(),extractFileName(__FILE__),__LINE__,__FUNCTION__,(unsigned long)ESP.getFreeHeap())
+#define DEBUGLOG(tag, text,...) DEBUG_LINE_PREFIX(tag);DBG_PORT.printf_P(PSTR(text),##__VA_ARGS__);DBG_PORT.println()
 #elif defined ESP32
 #define ARDUHAL_NTP_LOG(format)  "[%s:%u] %d %s(): " format "\r\n", pathToFileName(__FILE__), __LINE__, (unsigned long)ESP.getFreeHeap(), __FUNCTION__
 #define DEBUGLOG(tag, format, ...) log_printf(tag ARDUHAL_NTP_LOG(format), ##__VA_ARGS__)
@@ -161,62 +161,98 @@ bool NTPClient::begin (const char* ntpServerName) {
         DEBUGLOGE ("Invalid NTP server name");
         return false;
     }
+    DEBUGLOGI ("Got server name");
+
+    if (udp) {
+        DEBUGLOGI ("Remove UDP connection");
+        udp_disconnect (udp);
+        udp_remove (udp);
+        udp = NULL;
+    }
+    
 
     udp = udp_new ();
     if (!udp){
         DEBUGLOGE ("Failed to create NTP socket");
         return false;
     }
+    DEBUGLOGI ("NTP socket created");
     
     if (WiFi.isConnected ()) {
         ip_addr_t localAddress;
 #ifdef ESP32
         localAddress.u_addr.ip4.addr = WiFi.localIP ();
         localAddress.type = IPADDR_TYPE_V4;
+        DEBUGLOGI ("Bind UDP port %d to %s", DEFAULT_NTP_PORT, IPAddress (localAddress.u_addr.ip4.addr).toString ().c_str ());
 #else
         localAddress.addr = WiFi.localIP ();
+        DEBUGLOGI ("Bind UDP port %d to %s", DEFAULT_NTP_PORT, IPAddress (localAddress.addr).toString ().c_str ());
 #endif
-        result = udp_bind (udp, &localAddress, DEFAULT_NTP_PORT);
-        DEBUGLOGI ("Bind UDP port");
+        result = udp_bind (udp, /*IP_ADDR_ANY*/ &localAddress, DEFAULT_NTP_PORT);
         if (result) {
-            DEBUGLOGE ("Failed to bind to NTP port. %d", result);
+            DEBUGLOGE ("Failed to bind to NTP port. %d: %s", result, lwip_strerr (result));
+            if (udp) {
+                udp_disconnect (udp);
+                udp_remove (udp);
+                udp = NULL;
+            }
+            isConnected = false;
+            actualInterval = shortInterval;
             return false;
+        } else {
+            isConnected = true;
         }
-
+        
         udp_recv (udp, &NTPClient::s_recvPacket, this);
-        isConnected = true;
     }
     lastSyncd.tv_sec = 0;
     lastSyncd.tv_usec = 0;
+
+    actualInterval = ntpTimeout + 500;
     
-    DEBUGLOGI ("Time sync started");
-    
+    DEBUGLOGI ("Time sync started. NExt sync in %u ms", actualInterval);
+
+    // if (loopHandle) {
+    //     vTaskDelete (loopHandle);
+    //     DEBUGLOGI ("Loop task handle deleted");
+    //     loopHandle = NULL;
+    // }
+    // if (receiverHandle) {
+    //     vTaskDelete (receiverHandle);
+    //     DEBUGLOGI ("Receiver task handle deleted");
+    //     receiverHandle = NULL;
+    // }
+    //terminateTasks = false;
     //Start loop and receiver tasks
 #ifdef ESP32
-    xTaskCreateUniversal (
-        &NTPClient::s_getTimeloop, /* Task function. */
-        "NTP loop", /* name of task. */
-        2048, /* Stack size of task */
-        this, /* parameter of the task */
-        1, /* priority of the task */
-        &loopHandle, /* Task handle to keep track of created task */
-        CONFIG_ARDUINO_RUNNING_CORE);
-    
-    xTaskCreateUniversal (
-        &NTPClient::s_receiverTask, /* Task function. */
-        "NTP receiver", /* name of task. */
-        3072, /* Stack size of task */
-        this, /* parameter of the task */
-        1, /* priority of the task */
-        &receiverHandle, /* Task handle to keep track of created task */
-        CONFIG_ARDUINO_RUNNING_CORE);
+    if (!loopHandle) {
+        xTaskCreateUniversal (
+            &NTPClient::s_getTimeloop, /* Task function. */
+            "NTP loop", /* name of task. */
+            2048, /* Stack size of task */
+            this, /* parameter of the task */
+            1, /* priority of the task */
+            &loopHandle, /* Task handle to keep track of created task */
+            CONFIG_ARDUINO_RUNNING_CORE);
+    }
+
+    if (!receiverHandle) {
+        xTaskCreateUniversal (
+            &NTPClient::s_receiverTask, /* Task function. */
+            "NTP receiver", /* name of task. */
+            3072, /* Stack size of task */
+            this, /* parameter of the task */
+            1, /* priority of the task */
+            &receiverHandle, /* Task handle to keep track of created task */
+            CONFIG_ARDUINO_RUNNING_CORE);
+    }
 #else
     loopTimer.attach_ms (ESP8266_LOOP_TASK_INTERVAL, &NTPClient::s_getTimeloop, (void*)this);
     receiverTimer.attach_ms (ESP8266_RECEIVER_TASK_INTERVAL, &NTPClient::s_receiverTask, (void*)this);
 #endif
     
-    DEBUGLOGI ("First time sync request");
-    getTime ();
+    // DEBUGLOGI ("First time sync request");
+    // getTime ();
     
     return true;
 
@@ -387,9 +423,9 @@ void NTPClient::processPacket (struct pbuf* packet) {
         actualInterval = ntpTimeout + 500; //shortInterval;
     } else {
         actualInterval = longInterval;
+        DEBUGLOGI ("Sync frequency set low");
     }
     DEBUGLOGI ("Interval set to = %d", actualInterval);
-    DEBUGLOGI ("Sync frequency set low");
     DEBUGLOGI ("Successful NTP sync at %s", getTimeDateString (getLastNTPSync ()));
     if (!firstSync.tv_sec) {
         firstSync = lastSyncd;
@@ -426,12 +462,19 @@ void NTPClient::s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
 void NTPClient::s_receiverTask (void* arg){
     NTPClient* self = reinterpret_cast<NTPClient*>(arg);
 #ifdef ESP32
-    while (!self->terminateTasks) {
+    for (;;) {
+    //while (!self->terminateTasks) {
 #endif
         if (self->responsePacketValid) {
             self->processPacket (self->lastNtpResponsePacket);
             if (self->lastNtpResponsePacket->ref > 0) {
-                pbuf_free (self->lastNtpResponsePacket);            
+#ifdef ESP32
+                DEBUGLOGV ("pbuff type: %d", self->lastNtpResponsePacket->type);
+                DEBUGLOGV ("pbuff ref: %d", self->lastNtpResponsePacket->ref);
+                DEBUGLOGV ("pbuff next: %p", self->lastNtpResponsePacket->next);
+                if (self->lastNtpResponsePacket->type <= PBUF_POOL)
+#endif
+                    pbuf_free (self->lastNtpResponsePacket);
             }
             self->responsePacketValid = false;
         }
@@ -439,8 +482,8 @@ void NTPClient::s_receiverTask (void* arg){
         const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
         vTaskDelay (xDelay);
     }
-    DEBUGLOGW ("About to terminate receiver task. Handle %p", self->receiverHandle);
-    vTaskDelete (self->receiverHandle);
+    // DEBUGLOGW ("About to terminate receiver task. Handle %p", self->receiverHandle);
+    //vTaskDelete (self->receiverHandle);
 #endif
 }
 
@@ -468,72 +511,92 @@ char* NTPClient::getUptimeString () {
 void NTPClient::s_getTimeloop (void* arg) {
     NTPClient* self = reinterpret_cast<NTPClient*>(arg);
 #ifdef ESP32
-    while (!self->terminateTasks) {
+    for (;;) {
+   // while (!self->terminateTasks) {
 #endif // ESP32
         //DEBUGLOGI ("Running periodic task");
         static time_t lastGotTime;
-        if (self->isConnected) {
-            if (WiFi.isConnected ()) {
-                if (::millis () - lastGotTime >= self->actualInterval) {
-                    lastGotTime = ::millis ();
-                    DEBUGLOGI ("Periodic loop. Millis = %d", lastGotTime);
-                    self->getTime ();
+        if (::millis () - lastGotTime >= self->actualInterval) {
+            lastGotTime = ::millis ();
+            DEBUGLOGI ("Periodic loop. Millis = %d", lastGotTime);
+            if (self->isConnected) {
+                if (WiFi.isConnected ()) {
+                        self->getTime ();
+                } else {
+                    DEBUGLOGE ("DISCONNECTED");
+                    if (self->udp) {
+                        udp_disconnect (self->udp);
+                        udp_remove (self->udp);
+                        self->udp = NULL;
+                    }
+                    self->isConnected = false;
                 }
             } else {
-                DEBUGLOGE ("DISCONNECTED");
-                udp_remove (self->udp);
-                self->isConnected = false;
-            }
-        } else {
-            if (WiFi.isConnected ()) {
-                DEBUGLOGD ("CONNECTED. Binding");
+                if (WiFi.isConnected ()) {
+                    DEBUGLOGD ("CONNECTED. Binding");
+                    if (self->udp) {
+                        udp_disconnect (self->udp);
+                        udp_remove (self->udp);
+                        self->udp = NULL;
+                    }
 
-                self->udp = udp_new ();
-                if (!self->udp) {
-                    DEBUGLOGE ("Failed to create NTP socket");
-                    return; // false;
-                }
+                    self->udp = udp_new ();
+                    if (!self->udp) {
+                        DEBUGLOGE ("Failed to create NTP socket");
+                        return; // false;
+                    }
 
-                ip_addr_t localAddress;
+                    ip_addr_t localAddress;
 #ifdef ESP32
-                localAddress.u_addr.ip4.addr = WiFi.localIP ();
-                localAddress.type = IPADDR_TYPE_V4;
+                    localAddress.u_addr.ip4.addr = WiFi.localIP ();
+                    localAddress.type = IPADDR_TYPE_V4;
 #else // ESP8266
-                localAddress.addr = WiFi.localIP ();
+                    localAddress.addr = WiFi.localIP ();
 #endif // ESP32
-                err_t result = udp_bind (self->udp, &localAddress, DEFAULT_NTP_PORT);
-                DEBUGLOGI ("Bind UDP port");
-                if (result) {
-                    DEBUGLOGE ("Failed to bind to NTP port. %d", result);
-                    //return; //false;
-                }
+                    err_t result = udp_bind (self->udp, /*IP_ADDR_ANY*/ &localAddress, DEFAULT_NTP_PORT);
+                    DEBUGLOGI ("Bind UDP port");
+                    if (result) {
+                        DEBUGLOGE ("Failed to bind to NTP port. %d: %s", result, lwip_strerr (result));
+                        if (self->udp) {
+                            udp_disconnect (self->udp);
+                            udp_remove (self->udp);
+                            self->udp = NULL;
+                        }
 
-                udp_recv (self->udp, &NTPClient::s_recvPacket, self);
-                self->getTime ();
-                self->isConnected = true;
+                        self->isConnected = false;
+                        //return; //false;
+                    } else {
+                        self->isConnected = true;
+                    }
+
+                    udp_recv (self->udp, &NTPClient::s_recvPacket, self);
+                    self->getTime ();
+                }
             }
         }
 #ifdef ESP32
+
         const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
         vTaskDelay (xDelay);
     }
-    DEBUGLOGW ("About to terminate loop task. Handle %p", self->loopHandle);
-    if (self->udp) {
-        DEBUGLOGW ("Deleted UDP connection");
-        udp_remove (self->udp);
-    }
-    vTaskDelete (self->loopHandle);
-    DEBUGLOGW ("loop task terminated. Handle %p", self->loopHandle);
+    // DEBUGLOGW ("About to terminate loop task. Handle %p", self->loopHandle);
+    // if (self->udp) {
+    //     DEBUGLOGW ("Deleted UDP connection");
+    //     udp_disconnect (self->udp);
+    //     udp_remove (self->udp);
+    // }
+    // DEBUGLOGW ("loop task terminated. Handle %p", self->loopHandle);
 #endif // ESP32
 }
 
 void NTPClient::getTime () {
     err_t result;
+    static uint dnsErrors = 0;
     
     result = WiFi.hostByName (getNtpServerName (), ntpServerIPAddress);
     if (!result) {
         DEBUGLOGE ("HostByName error");
-
+        dnsErrors++;
         if (onSyncEvent) {
             NTPEvent_t event;
             event.event = invalidAddress;
@@ -542,10 +605,19 @@ void NTPClient::getTime () {
 
             onSyncEvent (event);        
         }
+        if (dnsErrors >= 3) {
+            dnsErrors = 0;
+            DEBUGLOGW ("Reconnecting WiFi");
+            WiFi.reconnect ();
+        }
+        return;
+    } else {
+        DEBUGLOGI ("NTP server address resolved to %s", ntpServerIPAddress.toString ().c_str ());
     }
+    dnsErrors = 0;
     if (ntpServerIPAddress == IPAddress(INADDR_NONE)) {
         DEBUGLOGE ("IP address unset. Aborting");
-        actualInterval = shortInterval;
+        actualInterval = ntpTimeout + 500;
         DEBUGLOGI ("Set interval to = %d", actualInterval);
         if (onSyncEvent) {
             NTPEvent_t event;
@@ -644,11 +716,11 @@ boolean NTPClient::sendNTPpacket () {
     
     if (currentime.tv_sec != 0) {
         packet.transmit.secondsOffset = flipInt32 (currentime.tv_sec + seventyYears);
-        DEBUGLOGD ("Current time: %ld.%ld", currentime.tv_sec, currentime.tv_usec);
+        DEBUGLOGV ("Current time: %ld.%ld", currentime.tv_sec, currentime.tv_usec);
         uint32_t timestamp_us = (uint32_t)((double)(currentime.tv_usec) / 1000000.0 * (double)0x100000000);
-        DEBUGLOGD ("timestamp_us = 0x%08X %lu", timestamp_us, timestamp_us);
+        DEBUGLOGV ("timestamp_us = 0x%08X %lu", timestamp_us, timestamp_us);
         packet.transmit.fraction = flipInt32 (timestamp_us);
-        DEBUGLOGD ("Transmit: 0x%08X : 0x%08X", packet.transmit.secondsOffset, packet.transmit.fraction);
+        DEBUGLOGV ("Transmit: 0x%08X : 0x%08X", packet.transmit.secondsOffset, packet.transmit.fraction);
         
     } else {
         packet.transmit.secondsOffset = 0;
@@ -661,16 +733,23 @@ boolean NTPClient::sendNTPpacket () {
     DEBUGLOGV ("NTP Packet\n%s", dumpNTPPacket ((uint8_t*)&packet, sizeof (NTPUndecodedPacket_t), strPacketBuffer, sizeStr));
 #endif
 
-    DEBUGLOGI ("Sendign packet");
+    DEBUGLOGI ("Sending packet");
     memcpy (buffer->payload, &packet, sizeof (NTPUndecodedPacket_t));
     result = udp_send (udp, buffer);
     if (buffer->ref > 0) {
-        pbuf_free (buffer);    
+#ifdef ESP32
+        DEBUGLOGV ("pbuff type: %d", buffer->type);
+        DEBUGLOGV ("pbuff ref: %d", buffer->ref);
+        DEBUGLOGV ("pbuff next: %p", buffer->next);
+        if (buffer->type <= PBUF_POOL)
+#endif
+            pbuf_free (buffer);
     }
     if (result == ERR_OK) {
         DEBUGLOGI ("UDP packet sent");
         return true;
     } else {
+        DEBUGLOGE ("Error sending UDP datagram. %d: %s", result, lwip_strerr (result));
         return false;
     }
 }
@@ -681,8 +760,9 @@ void ICACHE_RAM_ATTR NTPClient::s_processRequestTimeout (void* arg) {
 }
 
 void ICACHE_RAM_ATTR NTPClient::processRequestTimeout () {
-    status = unsyncd;
+    //NTPStatus_t prevStatus = status;
     //DEBUGLOGW ("Status set to UNSYNCD");
+    numTimeouts++;
     ntpRequested = false;
     responseTimer.detach ();
     DEBUGLOGE ("NTP response Timeout");
@@ -692,6 +772,11 @@ void ICACHE_RAM_ATTR NTPClient::processRequestTimeout () {
         event.info.serverAddress = ntpServerIPAddress;
         event.info.port = DEFAULT_NTP_PORT;
         onSyncEvent (event);
+    }
+    if (numTimeouts >= DEAULT_NUM_TIMEOUTS) {
+        numTimeouts = 0;
+        actualInterval = shortInterval;
+        DEBUGLOGE ("Waiting for %u ms", actualInterval);
     }
     // if (status==syncd) {
     //     actualInterval = longInterval;
@@ -708,7 +793,7 @@ bool NTPClient::setNtpServerName (const char* serverName) {
     if (!strlen (serverName)) {
         return false;
     }
-    DEBUGLOGI ("NTP server set to %s\n", serverName);
+    DEBUGLOGI ("NTP server set to %s", serverName);
     memset (ntpServerName, 0, SERVER_NAME_LENGTH);
     strncpy (ntpServerName, serverName, strnlen (serverName, SERVER_NAME_LENGTH));
     return true;
@@ -750,8 +835,8 @@ bool NTPClient::setInterval (int shortInterval, int longInterval) {
             actualInterval = this->longInterval;
         }
         DEBUGLOGI ("Interval set to = %d", actualInterval);
-        DEBUGLOGI ("Short sync interval set to %d s\n", shortInterval);
-        DEBUGLOGI ("Long sync interval set to %d s\n", longInterval);
+        DEBUGLOGI ("Short sync interval set to %d s", shortInterval);
+        DEBUGLOGI ("Long sync interval set to %d s", longInterval);
 return true;
     } else {
         DEBUGLOGW ("Too low interval values");
@@ -961,7 +1046,7 @@ timeval NTPClient::calculateOffset (NTPPacket_t* ntpPacket) {
     offset = ((t2 - t1) / 2.0 + (t3 - t4) / 2.0); // in seconds
     delay = (t4 - t1) - (t3 - t2); // in seconds
 
-    DEBUGLOGD ("T1: %f T2: %f T3: %f T4: %f", t1, t2, t3, t4);
+    DEBUGLOGV ("T1: %f T2: %f T3: %f T4: %f", t1, t2, t3, t4);
     DEBUGLOGD ("T1: %s", getTimeDateString (ntpPacket->origin));
     //DEBUGLOGV ("T1: %016X  %016X", ntpPacket->origin.tv_sec, ntpPacket->origin.tv_usec);
     DEBUGLOGD ("T2: %s", getTimeDateString (ntpPacket->receive));
