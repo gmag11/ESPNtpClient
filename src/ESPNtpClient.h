@@ -1,7 +1,7 @@
 /**
   * @file ESPNtpClient.h
-  * @version 0.2.3
-  * @date 14/02/2021
+  * @version 0.2.5
+  * @date 16/03/2021
   * @author German Martin
   * @brief Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32
   */
