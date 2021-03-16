@@ -195,7 +195,7 @@ bool NTPClient::begin (const char* ntpServerName) {
 #ifdef ESP32
     xTaskCreateUniversal (
         &NTPClient::s_getTimeloop, /* Task function. */
-        "NTP receiver", /* name of task. */
+        "NTP loop", /* name of task. */
         2048, /* Stack size of task */
         this, /* parameter of the task */
         1, /* priority of the task */
@@ -278,7 +278,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         round = 0;
         offsetSum = 0;
     } else {
-        actualInterval = ntpTimeout; // Set retry period equal to timeout
+        actualInterval = ntpTimeout + 500; // Set retry period equal to timeout + 500 ms
         DEBUGLOGI ("Retry in %u ms", actualInterval);
         return;
     }
@@ -384,7 +384,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         wasPartial = false;
     }
     if (status == partialSync) {
-        actualInterval = ntpTimeout; //shortInterval;
+        actualInterval = ntpTimeout + 500; //shortInterval;
     } else {
         actualInterval = longInterval;
     }
@@ -430,7 +430,9 @@ void NTPClient::s_receiverTask (void* arg){
 #endif
         if (self->responsePacketValid) {
             self->processPacket (self->lastNtpResponsePacket);
-            pbuf_free (self->lastNtpResponsePacket);
+            if (self->lastNtpResponsePacket->ref > 0) {
+                pbuf_free (self->lastNtpResponsePacket);            
+            }
             self->responsePacketValid = false;
         }
 #ifdef ESP32
@@ -662,7 +664,9 @@ boolean NTPClient::sendNTPpacket () {
     DEBUGLOGI ("Sendign packet");
     memcpy (buffer->payload, &packet, sizeof (NTPUndecodedPacket_t));
     result = udp_send (udp, buffer);
-    pbuf_free (buffer);
+    if (buffer->ref > 0) {
+        pbuf_free (buffer);    
+    }
     if (result == ERR_OK) {
         DEBUGLOGI ("UDP packet sent");
         return true;
