@@ -50,7 +50,7 @@ constexpr auto MIN_NTP_TIMEOUT = 250; ///< @brief Minumum admisible ntp timeout 
 constexpr auto MIN_NTP_INTERVAL = 10; ///< @brief Minumum NTP request interval in seconds
 constexpr auto DEFAULT_MIN_SYNC_ACCURACY_US = 5000; ///< @brief Minimum sync accuracy in us
 constexpr auto DEFAULT_MAX_RESYNC_RETRY = 3; ///< @brief Maximum number of sync retrials if offset is above accuravy
-constexpr auto DEAULT_NUM_TIMEOUTS = 3; ///< @bried After this number of timeouts there is no more continiuos
+constexpr auto DEAULT_NUM_TIMEOUTS = 3; ///< @brief After this number of timeouts there is no more continiuos
 #ifdef ESP8266
 constexpr auto ESP8266_LOOP_TASK_INTERVAL = 500; ///< @brief Loop task period on ESP8266
 constexpr auto ESP8266_RECEIVER_TASK_INTERVAL = 100; ///< @brief Receiver task period on ESP8266
@@ -64,13 +64,27 @@ constexpr auto SERVER_NAME_LENGTH = 40; ///< @brief Max server name (FQDN) lengt
 constexpr auto NTP_PACKET_SIZE = 48; ///< @brief NTP time is in the first 48 bytes of message
 
 /* Useful Constants */
+#ifndef SECS_PER_MIN
 constexpr auto SECS_PER_MIN = ((time_t)(60UL));
+#endif
+#ifndef SECS_PER_HOUR
 constexpr auto SECS_PER_HOUR = ((time_t)(3600UL));
+#endif
+#ifndef SECS_PER_DAY
 constexpr auto SECS_PER_DAY = ((time_t)(SECS_PER_HOUR * 24UL));
+#endif
+#ifndef DAYS_PER_WEEK
 constexpr auto DAYS_PER_WEEK = ((time_t)(7UL));
+#endif
+#ifndef SECS_PER_WEEK
 constexpr auto SECS_PER_WEEK = ((time_t)(SECS_PER_DAY * DAYS_PER_WEEK));
+#endif
+#ifndef SECS_PER_YEAR
 constexpr auto SECS_PER_YEAR = ((time_t)(SECS_PER_DAY * 365UL));
+#endif
+#ifndef SECS_YR_2000
 constexpr auto SECS_YR_2000 = ((time_t)(946684800UL)); ///< @brief The time at the start of y2k
+#endif
 
 #ifdef ESP32
 #include <WiFi.h>
@@ -729,7 +743,7 @@ public:
 
     /**
      * @brief Sets the number of sync attempts to calculate average offset
-     * @param rounds Number of average rounds 1..MAX_OFFSET_AVERAGE_ROUNDS
+     * @param rounds Number of average rounds 1.. MAX_OFFSET_AVERAGE_ROUNDS
      */
     void setnumAveRounds (int rounds) {
         if (rounds < 1) {
@@ -743,7 +757,7 @@ public:
 
     /**
      * @brief Gets the number of sync attempts to calculate average offset
-     * @return Number of average rounds 1..MAX_OFFSET_AVERAGE_ROUNDS
+     * @return Number of average rounds 1.. MAX_OFFSET_AVERAGE_ROUNDS
      */
     uint getnumAveRounds () {
         return numAveRounds;
