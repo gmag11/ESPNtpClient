@@ -154,9 +154,11 @@ char* dumpNTPPacket (char* data, size_t length, char* buffer, int len) {
     return buffer;
 }
 
-bool NTPClient::begin (const char* ntpServerName) {
+bool NTPClient::begin (const char* ntpServerName, bool manageWifi) {
     err_t result;
-    
+
+    this->manageWifi = manageWifi;
+
     if (!setNtpServerName (ntpServerName) || !strnlen (ntpServerName, SERVER_NAME_LENGTH)) {
         DEBUGLOGE ("Invalid NTP server name");
         return false;
@@ -607,8 +609,10 @@ void NTPClient::getTime () {
         }
         if (dnsErrors >= 3) {
             dnsErrors = 0;
-            DEBUGLOGW ("Reconnecting WiFi");
-            WiFi.reconnect ();
+            if (manageWifi) {
+                DEBUGLOGW ("Reconnecting WiFi");
+                WiFi.reconnect ();
+            }
         }
         return;
     } else {
