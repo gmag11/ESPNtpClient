@@ -130,7 +130,7 @@ int16_t flipInt16 (int16_t number) {
     return *result;
 }
 
-char* dumpNTPPacket (byte* data, size_t length, char* buffer, int len) {
+char* dumpNTPPacket (char* data, size_t length, char* buffer, int len) {
     int remaining = len - 1;
     int index = 0;
     int written;
