@@ -591,7 +591,7 @@ void NTPClient::s_getTimeloop (void* arg) {
 
 void NTPClient::getTime () {
     err_t result;
-    static uint dnsErrors = 0;
+    static unsigned int dnsErrors = 0;
     
     result = WiFi.hostByName (getNtpServerName (), ntpServerIPAddress);
     if (!result) {
@@ -1093,7 +1093,7 @@ bool NTPClient::adjustOffset (timeval* offset) {
     //     timersub (&currenttime, &_offset, &newtime);
     // }
 
-    if (settimeofday (&newtime, NULL)) { // hard adjustment
+    if (settimeofday (&newtime, (timezone*)NULL)) { // hard adjustment
         return false;
     }
     //Serial.printf ("millis() offset 1: %lld\n", currenttime_us / 1000 - millis ());
