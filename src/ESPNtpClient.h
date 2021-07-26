@@ -263,6 +263,7 @@ protected:
     NTPStatus_t status = unsyncd;   ///< @brief Sync status
     char ntpServerName[SERVER_NAME_LENGTH];                         ///< @brief  of NTP server on Internet or LAN
     IPAddress ntpServerIPAddress;   ///< @brief  IP address of NTP server on Internet or LAN
+    bool manageWifi = true;   ///< @brief  Enables this library to manage wifi reconnection. True by default
 public:
 #ifdef ESP32
     //bool terminateTasks = false;
@@ -421,7 +422,7 @@ public:
       * @param ntpServerName NTP server name as String
       * @return `true` if everything went ok
       */
-    bool begin (const char* ntpServerName = DEFAULT_NTP_SERVER);
+    bool begin (const char* ntpServerName = DEFAULT_NTP_SERVER, bool manageWifi = true);
     
     /**
       * @brief Sets NTP server name
