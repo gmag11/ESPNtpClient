@@ -159,11 +159,17 @@ bool NTPClient::begin (const char* ntpServerName, bool manageWifi) {
 
     this->manageWifi = manageWifi;
 
-    if (!setNtpServerName (ntpServerName) || !strnlen (ntpServerName, SERVER_NAME_LENGTH)) {
-        DEBUGLOGE ("Invalid NTP server name");
-        return false;
+    if (ntpServerName) {
+        if (!setNtpServerName (ntpServerName) || !strnlen (ntpServerName, SERVER_NAME_LENGTH)) {
+            DEBUGLOGE ("Invalid NTP server name");
+            return false;
+        }
+        DEBUGLOGI ("Got server name");
+    } else {
+        if (!strnlen (this->ntpServerName, SERVER_NAME_LENGTH)) {
+            setNtpServerName (DEFAULT_NTP_SERVER);
+        }
     }
-    DEBUGLOGI ("Got server name");
 
     if (udp) {
         DEBUGLOGI ("Remove UDP connection");

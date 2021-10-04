@@ -422,7 +422,7 @@ public:
       * @param ntpServerName NTP server name as String
       * @return `true` if everything went ok
       */
-    bool begin (const char* ntpServerName = DEFAULT_NTP_SERVER, bool manageWifi = true);
+    bool begin (const char* ntpServerName = NULL, bool manageWifi = true);
     
     /**
       * @brief Sets NTP server name
