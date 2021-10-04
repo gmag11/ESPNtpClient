@@ -16,8 +16,8 @@
 #endif
 
 #include <functional>
-using namespace std;
-using namespace placeholders;
+//using namespace std;
+//using namespace placeholders;
 
 extern "C" {
 #include "lwip/init.h"
