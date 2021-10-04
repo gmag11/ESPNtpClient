@@ -125,7 +125,7 @@ void loop() {
         processSyncEvent (ntpEvent);
     }
 
-    if ((millis () - last) > SHOW_TIME_PERIOD) {
+    if ((millis () - last) >= SHOW_TIME_PERIOD) {
         last = millis ();
         Serial.print (i); Serial.print (" ");
         Serial.print (NTP.getTimeDateStringUs ()); Serial.print (" ");
