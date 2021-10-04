@@ -112,7 +112,7 @@ int32_t flipInt32 (int32_t number) {
     }
 
     //DEBUGLOGV ("Output number %08X", *(int32_t*)output);
-    int32_t *result = (int32_t*)output;
+    int32_t* result = (int32_t*)output;
     return *result;
 }
 
@@ -180,7 +180,7 @@ bool NTPClient::begin (const char* ntpServerName, bool manageWifi) {
     
 
     udp = udp_new ();
-    if (!udp){
+    if (!udp) {
         DEBUGLOGE ("Failed to create NTP socket");
         return false;
     }
@@ -302,8 +302,8 @@ void NTPClient::processPacket (struct pbuf* packet) {
     }
 
     responseTimer.detach ();
-    
-    if (!decodeNtpMessage ((uint8_t*)packet->payload, packet->len, &ntpPacket)){
+
+    if (!decodeNtpMessage ((uint8_t*)packet->payload, packet->len, &ntpPacket)) {
         DEBUGLOGE ("Null pointer packet");
         return;
     }
@@ -334,7 +334,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         actualInterval = longInterval;
         numSyncRetry = 0;
         DEBUGLOGI ("Offset %0.3f ms is under threshold %ld. Not updating", offsetAve / 1000.0, timeSyncThreshold);
-        if (wasPartial){
+        if (wasPartial) {
             wasPartial = false;
             if (onSyncEvent) {
                 NTPEvent_t event;
@@ -421,7 +421,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
         DEBUGLOGI ("Next sync programmed for %d seconds", getLongInterval ());
         status = syncd;
         numSyncRetry = 0;
-        if (wasPartial){
+        if (wasPartial) {
             offsetApplied = true;
         }
         //Serial.printf ("Status: %d wasPartial: %d offsetApplied %d Offset %0.3f\n", status, wasPartial, offsetApplied, ((float)tvOffset.tv_sec + (float)tvOffset.tv_usec / 1000000.0) * 1000);
@@ -440,7 +440,7 @@ void NTPClient::processPacket (struct pbuf* packet) {
     }
     if (offsetApplied && onSyncEvent) {
         NTPEvent_t event;
-        if (status == partialSync){
+        if (status == partialSync) {
             event.event = partlySync;
             event.info.retrials = numSyncRetry;
             //event.info.offset = offset;
@@ -467,7 +467,7 @@ void NTPClient::s_recvPacket (void* arg, struct udp_pcb* pcb, struct pbuf* p,
     self->responsePacketValid = true;
 }
 
-void NTPClient::s_receiverTask (void* arg){
+void NTPClient::s_receiverTask (void* arg) {
     NTPClient* self = reinterpret_cast<NTPClient*>(arg);
 #ifdef ESP32
     for (;;) {
@@ -529,7 +529,7 @@ void NTPClient::s_getTimeloop (void* arg) {
             DEBUGLOGI ("Periodic loop. Millis = %d", lastGotTime);
             if (self->isConnected) {
                 if (WiFi.isConnected ()) {
-                        self->getTime ();
+                    self->getTime ();
                 } else {
                     DEBUGLOGE ("DISCONNECTED");
                     if (self->udp) {
@@ -611,7 +611,7 @@ void NTPClient::getTime () {
             event.info.serverAddress = ntpServerIPAddress;
             event.info.port = DEFAULT_NTP_PORT;
 
-            onSyncEvent (event);        
+            onSyncEvent (event);
         }
         if (dnsErrors >= 3) {
             dnsErrors = 0;
@@ -622,10 +622,10 @@ void NTPClient::getTime () {
         }
         return;
     } else {
-        DEBUGLOGI ("NTP server address resolved to %s", ntpServerIPAddress.toString ().c_str ());
+        DEBUGLOGI ("NTP server address %s resolved to %s", ntpServerName, ntpServerIPAddress.toString ().c_str ());
     }
     dnsErrors = 0;
-    if (ntpServerIPAddress == IPAddress(INADDR_NONE)) {
+    if (ntpServerIPAddress == IPAddress (INADDR_NONE)) {
         DEBUGLOGE ("IP address unset. Aborting");
         actualInterval = ntpTimeout + 500;
         DEBUGLOGI ("Set interval to = %d", actualInterval);
@@ -706,7 +706,7 @@ boolean NTPClient::sendNTPpacket () {
     pbuf* buffer;
     NTPUndecodedPacket_t packet;
     buffer = pbuf_alloc (PBUF_TRANSPORT, sizeof (NTPUndecodedPacket_t), PBUF_RAM);
-    if (!buffer){
+    if (!buffer) {
         DEBUGLOGE ("Cannot allocate UDP packet buffer");
         return false;
     }
@@ -847,10 +847,10 @@ bool NTPClient::setInterval (int shortInterval, int longInterval) {
         DEBUGLOGI ("Interval set to = %d", actualInterval);
         DEBUGLOGI ("Short sync interval set to %d s", shortInterval);
         DEBUGLOGI ("Long sync interval set to %d s", longInterval);
-return true;
+        return true;
     } else {
         DEBUGLOGW ("Too low interval values");
-        return false;    
+        return false;
     }
 }
 
@@ -917,10 +917,10 @@ NTPPacket_t* NTPClient::decodeNtpMessage (uint8_t* messageBuffer, size_t length,
     decPacket->peerStratum = recPacket.peerStratum;
     DEBUGLOGD ("Peer Stratum = %u", decPacket->peerStratum);
 
-    decPacket->pollingInterval = pow(2, recPacket.pollingInterval);
+    decPacket->pollingInterval = pow (2, recPacket.pollingInterval);
     DEBUGLOGD ("Polling Interval = %u", decPacket->pollingInterval);
 
-    decPacket->clockPrecission = pow(2,recPacket.clockPrecission);
+    decPacket->clockPrecission = pow (2, recPacket.clockPrecission);
     DEBUGLOGD ("Clock Precission = %0.3f us", decPacket->clockPrecission * 1000000);
 
     int16_t ts16_s = flipInt16 (recPacket.rootDelay.secondsOffset);
@@ -1006,7 +1006,7 @@ NTPPacket_t* NTPClient::decodeNtpMessage (uint8_t* messageBuffer, size_t length,
 
 bool NTPClient::checkNTPresponse (NTPPacket_t* ntpPacket, int64_t offsetUs) {
     //dumpNtpPacketInfo (ntpPacket);
-    if (ntpPacket->flags.li!=0){
+    if (ntpPacket->flags.li != 0) {
         DEBUGLOGE ("Leap indicator error: %d", ntpPacket->flags.li);
         return false;
     }
@@ -1036,10 +1036,10 @@ bool NTPClient::checkNTPresponse (NTPPacket_t* ntpPacket, int64_t offsetUs) {
 
         //Serial.printf ("Dispersion:        %0.6f s\n", ntpPacket->dispersion);
         //Serial.printf ("Offset:            %0.6f s\n", offsetUs / 1000000.0);
-        if (ntpPacket->dispersion > abs(offsetUs / 1000000.0) || ntpPacket->dispersion == 0.0) {
+        if (ntpPacket->dispersion > abs (offsetUs / 1000000.0) || ntpPacket->dispersion == 0.0) {
             DEBUGLOGE ("Dispersion error: %0.3f ms > Offset: %0.3f ms", ntpPacket->dispersion * 1000.0, (float)(offsetUs / 1000.0));
             return false;
-        }    
+        }
     }
 
     return true;
