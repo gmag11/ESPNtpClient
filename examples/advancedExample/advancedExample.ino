@@ -29,6 +29,17 @@ NTPEvent_t ntpEvent; // Last triggered event
 double offset;
 double timedelay;
 
+// weak functions to get connection status, reconnect and IP address of device
+bool connectionStatus() {
+  return WiFi.isConnected ();
+}
+bool connectionReconnect() {
+  return WiFi.reconnect ();
+}
+IPAddress getDeviceIP() {
+  return WiFi.localIP ();
+}
+
 #ifdef ESP32
 void onWifiEvent (system_event_id_t event, system_event_info_t info) {
 #else
