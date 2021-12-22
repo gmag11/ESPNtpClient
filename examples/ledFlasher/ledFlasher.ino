@@ -27,6 +27,16 @@ void processSyncEvent (NTPEvent_t ntpEvent) {
     Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str(ntpEvent));
 }
 
+// weak functions to get connection status, reconnect and IP address of device
+bool connectionStatus() {
+  return WiFi.isConnected ();
+}
+bool connectionReconnect() {
+  return WiFi.reconnect ();
+}
+IPAddress getDeviceIP() {
+  return WiFi.localIP ();
+}
 
 void setup () {
     Serial.begin (115200);
