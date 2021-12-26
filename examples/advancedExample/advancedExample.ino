@@ -56,29 +56,19 @@ double offset;
 double timedelay;
 
 // weak functions to get connection status, reconnect and IP address of device
-bool connectionStatus() {
-  #if (USE_ETHERNET)
+#if (USE_ETHERNET)
+  bool connectionStatus() {
       return eth.connected ();
-  #else
-      return WiFi.isConnected ();
-  #endif
-}
-
-bool connectionReconnect() {
-  #if (USE_ETHERNET)
+  }
+  
+  bool connectionReconnect() {
       return true;
-  #else
-      return WiFi.reconnect ();
-  #endif
-}
-
-IPAddress getDeviceIP() {
-  #if (USE_ETHERNET)
+  }
+  
+  IPAddress getDeviceIP() {
       return eth.localIP ();
-  #else
-      return WiFi.localIP ();
-  #endif
-}
+  }
+#endif //USE_ETHERNET
 
 #if (!USE_ETHERNET)
   #ifdef ESP32
