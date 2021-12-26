@@ -1197,16 +1197,16 @@ extern "C"
 {
   bool connectionStatus() __attribute__ ((weak, alias("__connectionStatus")));
   bool __connectionStatus() {
-    //*****
+    return WiFi.isConnected ();
   }
   
   bool connectionReconnect() __attribute__ ((weak, alias("__connectionReconnect")));
   bool __connectionReconnect() {
-    //*****
+    return WiFi.reconnect ();
   }
   
   IPAddress getDeviceIP() __attribute__ ((weak, alias("__getDeviceIP")));
   IPAddress __getDeviceIP() {
-    //*****
+    return WiFi.localIP ();
   }
 }
