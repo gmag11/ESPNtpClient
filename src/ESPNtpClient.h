@@ -420,6 +420,7 @@ public:
     /**
       * @brief Starts time synchronization
       * @param ntpServerName NTP server name as String
+      * @param manageWifi `true` if WiFi should be managed by library
       * @return `true` if everything went ok
       */
     bool begin (const char* ntpServerName = NULL, bool manageWifi = true);

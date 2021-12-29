@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['begin_211',['begin',['../classNTPClient.html#a4bd1663f4ec21b44ee696c44fc6b7674',1,'NTPClient']]]
+  ['begin_0',['begin',['../classNTPClient.html#a97358f6df5a00b0faa2bab288aef5d25',1,'NTPClient']]]
 ];
