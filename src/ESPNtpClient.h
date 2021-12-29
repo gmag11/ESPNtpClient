@@ -555,7 +555,7 @@ public:
       * @return String built from given time
       */
     char* getTimeStr (timeval moment) {
-        tm* local_tm = localtime ((time_t*)&moment.tv_usec);
+        tm* local_tm = localtime (&moment.tv_sec);
         size_t index = strftime (strBuffer, sizeof (strBuffer), "%H:%M:%S", local_tm);
         snprintf (strBuffer + index, sizeof (strBuffer) - index, ".%06ld", moment.tv_usec);
         return strBuffer;
