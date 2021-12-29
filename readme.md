@@ -18,7 +18,7 @@ ESPNtpClient do not have any external dependency.
 
 ----------------
 
-**Important**: This library task is only related to time synchronization and, as NTP protocol does, works using UTC time internally. All time management including local time conversion, time zones, daylight savings, etc. is done by Espressif sdk time subsystem that is based on GNU time C library. https://kirste.userpage.fu-berlin.de/chemnet/use/info/libc/libc_17.html
+**Important**: This library task is only related to time synchronization and, as NTP protocol does, works using UTC time internally. All time management including local time conversion, time zones, daylight savings, etc. is done by Espressif sdk time subsystem that is based on GNU time C library. https://web.archive.org/web/20210226233334/https://kirste.userpage.fu-berlin.de/chemnet/use/info/libc/libc_17.html
 
 ----------
 
