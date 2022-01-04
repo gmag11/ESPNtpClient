@@ -607,8 +607,10 @@ void NTPClient::getTime () {
         }
         if (dnsErrors >= 3) {
             dnsErrors = 0;
-            DEBUGLOGW ("Reconnecting WiFi/Ethernet");
-            connectionReconnect ();
+            if (manageWifi) {
+            	DEBUGLOGW ("Reconnecting WiFi/Ethernet");
+            	connectionReconnect ();
+            }
         }
         return;
     } else {
