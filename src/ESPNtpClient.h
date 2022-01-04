@@ -1,7 +1,7 @@
 /**
   * @file ESPNtpClient.h
-  * @version 0.2.5
-  * @date 16/03/2021
+  * @version 0.2.6
+  * @date 29/12/2021
   * @author German Martin
   * @brief Library to get system sync from a NTP server with microseconds accuracy in ESP8266 and ESP32
   */
@@ -16,8 +16,8 @@
 #endif
 
 #include <functional>
-using namespace std;
-using namespace placeholders;
+//using namespace std;
+//using namespace placeholders;
 
 extern "C" {
 #include "lwip/init.h"
@@ -261,16 +261,17 @@ protected:
     onSyncEvent_t onSyncEvent;      ///< @brief Event handler callback
     uint16_t ntpTimeout = DEFAULT_NTP_TIMEOUT;                      ///< @brief Response timeout for NTP requests
     long minSyncAccuracyUs = DEFAULT_MIN_SYNC_ACCURACY_US;          ///< @brief DEfault minimum offset value to consider a good sync
-    uint maxNumSyncRetry = DEFAULT_MAX_RESYNC_RETRY;                ///< @brief Number of resync repetitions if minimum accuracy has not been reached
-    uint numSyncRetry;              ///< @brief Current resync repetition
-    uint maxDispersionErrors = DEFAULT_MAX_RESYNC_RETRY;            ///< @brief Number of resync repetitions if server has a dispersion value bigger than offset absolute value
-    uint numDispersionErrors;
+    unsigned int maxNumSyncRetry = DEFAULT_MAX_RESYNC_RETRY;                ///< @brief Number of resync repetitions if minimum accuracy has not been reached
+    unsigned int numSyncRetry;              ///< @brief Current resync repetition
+    unsigned int maxDispersionErrors = DEFAULT_MAX_RESYNC_RETRY;            ///< @brief Number of resync repetitions if server has a dispersion value bigger than offset absolute value
+    unsigned int numDispersionErrors;
     long timeSyncThreshold = DEFAULT_TIME_SYNC_THRESHOLD;           ///< @brief If calculated offset is below this threshold it will not be applied. 
                                                                     //            This is to avoid continious innecesary glitches in clock
-    uint numTimeouts = 0;           ///< @brief After this number of timeout responses ntp sync time is increased
+    unsigned int numTimeouts = 0;           ///< @brief After this number of timeout responses ntp sync time is increased
     NTPStatus_t status = unsyncd;   ///< @brief Sync status
     char ntpServerName[SERVER_NAME_LENGTH];                         ///< @brief  of NTP server on Internet or LAN
     IPAddress ntpServerIPAddress;   ///< @brief  IP address of NTP server on Internet or LAN
+    bool manageWifi = true;   ///< @brief  Enables this library to manage wifi reconnection. True by default
 public:
 #ifdef ESP32
     //bool terminateTasks = false;
@@ -290,8 +291,8 @@ protected:
     
     int64_t offsetSum;              ///< @brief Sum of offsets for average calculation
     int64_t offsetAve;              ///< @brief Average calculated value
-    uint round = 0;                 ///< @brief Number of offset values added during last sync 
-    uint numAveRounds = DEFAULT_NUM_OFFSET_AVE_ROUNDS;          ///< @brief Number of request to be done to calculate average.
+    unsigned int round = 0;                 ///< @brief Number of offset values added during last sync 
+    unsigned int numAveRounds = DEFAULT_NUM_OFFSET_AVE_ROUNDS;          ///< @brief Number of request to be done to calculate average.
     
     pbuf* lastNtpResponsePacket;    ///< @brief Last response packet to be processed by receiver task
     bool responsePacketValid = false;                           ///< @brief Is `lastNtpResponsePacket` already processed?
@@ -427,9 +428,10 @@ public:
     /**
       * @brief Starts time synchronization
       * @param ntpServerName NTP server name as String
+      * @param manageWifi `true` if WiFi should be managed by library
       * @return `true` if everything went ok
       */
-    bool begin (const char* ntpServerName = DEFAULT_NTP_SERVER);
+    bool begin (const char* ntpServerName = NULL, bool manageWifi = true);
     
     /**
       * @brief Sets NTP server name
@@ -562,7 +564,7 @@ public:
       * @return String built from given time
       */
     char* getTimeStr (timeval moment) {
-        tm* local_tm = localtime ((time_t*)&moment.tv_usec);
+        tm* local_tm = localtime (&moment.tv_sec);
         size_t index = strftime (strBuffer, sizeof (strBuffer), "%H:%M:%S", local_tm);
         snprintf (strBuffer + index, sizeof (strBuffer) - index, ".%06ld", moment.tv_usec);
         return strBuffer;
@@ -767,7 +769,7 @@ public:
      * @brief Gets the number of sync attempts to calculate average offset
      * @return Number of average rounds 1.. MAX_OFFSET_AVERAGE_ROUNDS
      */
-    uint getnumAveRounds () {
+    unsigned int getnumAveRounds () {
         return numAveRounds;
     }
     
