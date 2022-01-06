@@ -186,14 +186,14 @@ bool NTPClient::begin (const char* ntpServerName, bool manageWifi) {
     }
     DEBUGLOGI ("NTP socket created");
     
-    if (WiFi.isConnected ()) {
+    if (connectionStatus ()) {
         ip_addr_t localAddress;
 #ifdef ESP32
-        localAddress.u_addr.ip4.addr = WiFi.localIP ();
+        localAddress.u_addr.ip4.addr = getDeviceIP ();
         localAddress.type = IPADDR_TYPE_V4;
         DEBUGLOGI ("Bind UDP port %d to %s", DEFAULT_NTP_PORT, IPAddress (localAddress.u_addr.ip4.addr).toString ().c_str ());
 #else
-        localAddress.addr = WiFi.localIP ();
+        localAddress.addr = getDeviceIP ();
         DEBUGLOGI ("Bind UDP port %d to %s", DEFAULT_NTP_PORT, IPAddress (localAddress.addr).toString ().c_str ());
 #endif
         result = udp_bind (udp, /*IP_ADDR_ANY*/ &localAddress, DEFAULT_NTP_PORT);
@@ -528,7 +528,7 @@ void NTPClient::s_getTimeloop (void* arg) {
             lastGotTime = ::millis ();
             DEBUGLOGI ("Periodic loop. Millis = %d", lastGotTime);
             if (self->isConnected) {
-                if (WiFi.isConnected ()) {
+                if (connectionStatus ()) {
                     self->getTime ();
                 } else {
                     DEBUGLOGE ("DISCONNECTED");
@@ -540,7 +540,7 @@ void NTPClient::s_getTimeloop (void* arg) {
                     self->isConnected = false;
                 }
             } else {
-                if (WiFi.isConnected ()) {
+                if (connectionStatus ()) {
                     DEBUGLOGD ("CONNECTED. Binding");
                     if (self->udp) {
                         udp_disconnect (self->udp);
@@ -556,10 +556,10 @@ void NTPClient::s_getTimeloop (void* arg) {
 
                     ip_addr_t localAddress;
 #ifdef ESP32
-                    localAddress.u_addr.ip4.addr = WiFi.localIP ();
+                    localAddress.u_addr.ip4.addr = getDeviceIP ();
                     localAddress.type = IPADDR_TYPE_V4;
 #else // ESP8266
-                    localAddress.addr = WiFi.localIP ();
+                    localAddress.addr = getDeviceIP ();
 #endif // ESP32
                     err_t result = udp_bind (self->udp, /*IP_ADDR_ANY*/ &localAddress, DEFAULT_NTP_PORT);
                     DEBUGLOGI ("Bind UDP port");
@@ -617,7 +617,7 @@ void NTPClient::getTime () {
             dnsErrors = 0;
             if (manageWifi) {
                 DEBUGLOGW ("Reconnecting WiFi");
-                WiFi.reconnect ();
+                connectionReconnect ();
             }
         }
         return;
@@ -1200,4 +1200,23 @@ char* NTPClient::ntpEvent2str (NTPEvent_t e) {
     }
 
     return result;
+}
+
+/// weak functions to get connection status, reconnect and IP address of device
+extern "C"
+{
+  bool connectionStatus() __attribute__ ((weak, alias("__connectionStatus")));
+  bool __connectionStatus() {
+    return WiFi.isConnected ();
+  }
+  
+  bool connectionReconnect() __attribute__ ((weak, alias("__connectionReconnect")));
+  bool __connectionReconnect() {
+    return WiFi.reconnect ();
+  }
+  
+  IPAddress getDeviceIP() __attribute__ ((weak, alias("__getDeviceIP")));
+  IPAddress __getDeviceIP() {
+    return WiFi.localIP ();
+  }
 }

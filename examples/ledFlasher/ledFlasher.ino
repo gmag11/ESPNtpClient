@@ -27,7 +27,6 @@ void processSyncEvent (NTPEvent_t ntpEvent) {
     Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str(ntpEvent));
 }
 
-
 void setup () {
     Serial.begin (115200);
     Serial.println ();

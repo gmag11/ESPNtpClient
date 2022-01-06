@@ -236,6 +236,14 @@ typedef std::function<void (NTPEvent_t)> onSyncEvent_t; ///< @brief Event notifi
 
 static char strBuffer[35]; ///< @brief Temporary buffer for time and date strings
 
+/// weak functions to get connection status, reconnect and IP address of device
+extern "C"
+{
+  bool connectionStatus();
+  bool connectionReconnect();
+  IPAddress getDeviceIP();
+}
+
 /**
   * @brief NTPClient class
   */
