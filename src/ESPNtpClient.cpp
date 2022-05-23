@@ -480,7 +480,7 @@ void NTPClient::s_receiverTask (void* arg) {
                 DEBUGLOGV ("pbuff type: %d", self->lastNtpResponsePacket->type);
                 DEBUGLOGV ("pbuff ref: %d", self->lastNtpResponsePacket->ref);
                 DEBUGLOGV ("pbuff next: %p", self->lastNtpResponsePacket->next);
-                if (self->lastNtpResponsePacket->type <= PBUF_POOL)
+                if (self->lastNtpResponsePacket->type_internal <= PBUF_POOL)
 #endif
                     pbuf_free (self->lastNtpResponsePacket);
             }
@@ -751,7 +751,7 @@ boolean NTPClient::sendNTPpacket () {
         DEBUGLOGV ("pbuff type: %d", buffer->type);
         DEBUGLOGV ("pbuff ref: %d", buffer->ref);
         DEBUGLOGV ("pbuff next: %p", buffer->next);
-        if (buffer->type <= PBUF_POOL)
+        if (buffer->type_internal <= PBUF_POOL)
 #endif
             pbuf_free (buffer);
     }

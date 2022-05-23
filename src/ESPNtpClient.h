@@ -25,11 +25,7 @@ extern "C" {
 #include "lwip/err.h"
 #include "lwip/dns.h"
 #include "sys/time.h"
-#ifdef ESP32
-#include "include/time.h"
-#else
 #include "time.h"
-#endif
 #include "lwip/udp.h"
 #include "lwip/ip_addr.h"
 }
