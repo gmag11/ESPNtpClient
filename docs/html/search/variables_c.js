@@ -13,5 +13,5 @@ var searchData=
   ['shortinterval_10',['shortInterval',['../classNTPClient.html#a435168f41cd4e698487897454745b2a0',1,'NTPClient']]],
   ['status_11',['status',['../classNTPClient.html#ac6fc7719151efe2da5f7e37748ff4479',1,'NTPClient']]],
   ['strbuffer_12',['strBuffer',['../ESPNtpClient_8h.html#a664853cff9b57a85bd6953ecc4a628e4',1,'ESPNtpClient.h']]],
-  ['synceventtriggered_13',['syncEventTriggered',['../advancedExample_8ino.html#a4723d571f64ea64708516f7fd6be1fa8',1,'syncEventTriggered():&#160;advancedExample.ino'],['../ledFlasher_8ino.html#a4723d571f64ea64708516f7fd6be1fa8',1,'syncEventTriggered():&#160;ledFlasher.ino'],['../main_8cpp.html#a4723d571f64ea64708516f7fd6be1fa8',1,'syncEventTriggered():&#160;main.cpp']]]
+  ['synceventtriggered_13',['syncEventTriggered',['../advancedExample_8cpp.html#a4723d571f64ea64708516f7fd6be1fa8',1,'syncEventTriggered():&#160;advancedExample.cpp'],['../ledFlasher_8cpp.html#a4723d571f64ea64708516f7fd6be1fa8',1,'syncEventTriggered():&#160;ledFlasher.cpp'],['../main_8cpp.html#a4723d571f64ea64708516f7fd6be1fa8',1,'syncEventTriggered():&#160;main.cpp']]]
 ];

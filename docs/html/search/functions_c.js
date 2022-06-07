@@ -13,7 +13,7 @@ var searchData=
   ['setnumaverounds_10',['setnumAveRounds',['../classNTPClient.html#ac973596693ad12bc9a33a6a365d2a9ea',1,'NTPClient']]],
   ['settimesyncthreshold_11',['settimeSyncThreshold',['../classNTPClient.html#a5cc469c30606116c8d2d2ad5043af0cb',1,'NTPClient']]],
   ['settimezone_12',['setTimeZone',['../classNTPClient.html#a2f03ad70e80f516146222bbe60da1475',1,'NTPClient']]],
-  ['setup_13',['setup',['../advancedExample_8ino.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;advancedExample.ino'],['../basicExample_8ino.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;basicExample.ino'],['../ledFlasher_8ino.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;ledFlasher.ino'],['../main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;main.cpp']]],
+  ['setup_13',['setup',['../advancedExample_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;advancedExample.cpp'],['../basicExample_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;basicExample.cpp'],['../ledFlasher_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;ledFlasher.cpp'],['../main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;main.cpp']]],
   ['stop_14',['stop',['../classNTPClient.html#ac9f9667304aec04e1a6973f32b544726',1,'NTPClient']]],
   ['syncstatus_15',['syncStatus',['../classNTPClient.html#a1e08ee8ebd545f81f81d19e1ead5244f',1,'NTPClient']]]
 ];
