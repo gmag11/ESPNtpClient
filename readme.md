@@ -22,7 +22,7 @@ ESPNtpClient do not have any external dependency.
 
 ----------
 
-** Note **: ESP32 and ESP8266 have their own SNTP clients into their respectives SDKs. So, unless you need additional accuracy that this library provides, it is always recommended to use ESP32 or ESP8266 SDKs.
+**Note**: ESP32 and ESP8266 have their own SNTP clients into their respectives SDKs. So, unless you need additional accuracy that this library provides, it is always recommended to use ESP32 or ESP8266 SDKs.
 
 ----------
 
