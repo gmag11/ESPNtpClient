@@ -27,7 +27,7 @@ void setup() {
 void loop() {
     static int last = 0;
 
-    if ((millis () - last) >= SHOW_TIME_PERIOD) {
+    if ((millis () - last) > SHOW_TIME_PERIOD) {
         last = millis ();
         Serial.println (NTP.getTimeDateStringUs ());
     }
