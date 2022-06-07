@@ -477,7 +477,7 @@ void NTPClient::s_receiverTask (void* arg) {
             self->processPacket (self->lastNtpResponsePacket);
             if (self->lastNtpResponsePacket->ref > 0) {
 #ifdef ESP32
-                DEBUGLOGV ("pbuff type: %d", self->lastNtpResponsePacket->type);
+                DEBUGLOGV ("pbuff type: %d", self->lastNtpResponsePacket->type_internal);
                 DEBUGLOGV ("pbuff ref: %d", self->lastNtpResponsePacket->ref);
                 DEBUGLOGV ("pbuff next: %p", self->lastNtpResponsePacket->next);
                 if (self->lastNtpResponsePacket->type_internal <= PBUF_POOL)
@@ -740,7 +740,7 @@ boolean NTPClient::sendNTPpacket () {
 #if DEBUG_NTPCLIENT > 4
     const int sizeStr = 200;
     char strPacketBuffer[sizeStr];
-    DEBUGLOGV ("NTP Packet\n%s", dumpNTPPacket ((uint8_t*)&packet, sizeof (NTPUndecodedPacket_t), strPacketBuffer, sizeStr));
+    DEBUGLOGV ("NTP Packet\n%s", dumpNTPPacket ((char*)&packet, sizeof (NTPUndecodedPacket_t), strPacketBuffer, sizeStr));
 #endif
 
     DEBUGLOGI ("Sending packet");
@@ -748,7 +748,7 @@ boolean NTPClient::sendNTPpacket () {
     result = udp_send (udp, buffer);
     if (buffer->ref > 0) {
 #ifdef ESP32
-        DEBUGLOGV ("pbuff type: %d", buffer->type);
+        DEBUGLOGV ("pbuff type: %d", buffer->type_internal);
         DEBUGLOGV ("pbuff ref: %d", buffer->ref);
         DEBUGLOGV ("pbuff next: %p", buffer->next);
         if (buffer->type_internal <= PBUF_POOL)
@@ -903,7 +903,7 @@ NTPPacket_t* NTPClient::decodeNtpMessage (uint8_t* messageBuffer, size_t length,
 #ifdef DEBUG_NTPCLIENT
     char buffer[250];
 #endif
-    DEBUGLOGV ("\n%s", dumpNTPPacket (messageBuffer, length, buffer, 250));
+    DEBUGLOGV ("\n%s", dumpNTPPacket ((char*)messageBuffer, length, buffer, 250));
 
     decPacket->flags.li = recPacket.flags >> 6;
     DEBUGLOGD ("LI = %u", decPacket->flags.li);
