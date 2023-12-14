@@ -30,7 +30,7 @@ double offset;
 double timedelay;
 
 #ifdef ESP32
-void onWifiEvent (system_event_id_t event, system_event_info_t info) {
+void onWifiEvent (arduino_event_id_t event, arduino_event_info_t info) {
 #else
 void onWifiEvent (WiFiEvent_t event) {
 #endif
@@ -39,7 +39,7 @@ void onWifiEvent (WiFiEvent_t event) {
     switch (event) {
 #ifdef ESP32
     case SYSTEM_EVENT_STA_CONNECTED:
-        Serial.printf ("Connected to %s. Asking for IP address.\r\n", info.connected.ssid);
+        Serial.printf ("Connected to %s. Asking for IP address.\r\n", info.wifi_sta_connected.ssid);
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
         Serial.printf ("Got IP: %s\r\n", IPAddress (info.got_ip.ip_info.ip.addr).toString ().c_str ());
@@ -48,8 +48,8 @@ void onWifiEvent (WiFiEvent_t event) {
         wifiFirstConnected = true;
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        Serial.printf ("Disconnected from SSID: %s\n", info.disconnected.ssid);
-        Serial.printf ("Reason: %d\n", info.disconnected.reason);
+        Serial.printf ("Disconnected from SSID: %s\n", info.wifi_sta_disconnected.ssid);
+        Serial.printf ("Reason: %d\n", info.wifi_sta_disconnected.reason);
         digitalWrite (ONBOARDLED, HIGH); // Turn off LED
         //NTP.stop(); // NTP sync can be disabled to avoid sync errors
         WiFi.reconnect ();
